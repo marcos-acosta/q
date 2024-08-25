@@ -1,5 +1,5 @@
-import ActionList from "./components/ActionList";
+import ItemList from "./components/ItemList";
 
 export default async function Q() {
-  return <ActionList />;
+  return <ItemList />;
 }

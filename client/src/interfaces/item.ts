@@ -35,11 +35,6 @@ export interface Link {
   url: string;
 }
 
-export interface Tags {
-  explicit_tags: string[];
-  inherited_tags: string[];
-}
-
 export enum PriorityLevel {
   P0,
   P1,
@@ -48,20 +43,16 @@ export enum PriorityLevel {
   P4,
 }
 
-export interface Priority {
-  explicity_priority?: PriorityLevel;
-  inherited_priorities: PriorityLevel[];
-}
-
 export interface Item {
   name: string;
   id: string;
-  sub_item_ids?: string[];
-  parent_item_id?: string;
-  planning: Planning;
+  dependency_ids: string[];
+  dependent_id?: string;
+  planning?: Planning;
   logs: Log[];
   links: Link[];
-  tags: Tags;
-  priority: Priority;
+  tags: string[];
+  priority?: PriorityLevel;
   is_goal?: boolean;
+  is_completed?: boolean;
 }
