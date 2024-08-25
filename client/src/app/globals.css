@@ -1,0 +1,15 @@
+body {
+  font-size: 18pt;
+  --theme-blue: #c6d8ea;
+  --theme-green: #c8dac6;
+}
+
+button {
+  background-color: unset;
+  border: unset;
+  cursor: pointer;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
