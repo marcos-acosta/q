@@ -1,3 +1,5 @@
+import { TimeUnit } from "@/interfaces/definitions/item";
+
 const MINUTES_IN_HOUR = 60;
 
 const formatCompletionTime = (time_minutes: number) => {
@@ -13,5 +15,30 @@ const formatCompletionTime = (time_minutes: number) => {
     return `${minutes_remainder}m`;
   }
 };
+
+const convertFrequencyToWords = (
+  frequency: number | undefined
+): string | undefined => {
+  if (!frequency || frequency < 1) {
+    return undefined;
+  } else if (frequency < 3) {
+    return ["once", "twice"][frequency - 1];
+  } else {
+    return `${frequency} times`;
+  }
+};
+
+const unit_to_word = {
+  [TimeUnit.DAY]: "day",
+  [TimeUnit.WEEK]: "week",
+  [TimeUnit.MONTH]: "month",
+  [TimeUnit.YEAR]: "year",
+};
+
+// const format_recurrence = (planning: Planning) => {
+//   if (planning.effort) {
+//     if (typeof planning.effort === TimeEffort)
+//   }
+// }
 
 export { formatCompletionTime };

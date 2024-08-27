@@ -1,10 +1,9 @@
-import { Item } from "@/interfaces/item";
+import { Item } from "@/interfaces/definitions/item";
 import styles from "./../css/ItemCard.module.css";
-import { formatPlanning } from "@/util/item-utils";
+// import { formatPlanning } from "@/util/item-utils";
 
 interface ItemCardProps {
   item: Item;
-  isBlocked: boolean;
 }
 
 export default function ItemCard(props: ItemCardProps) {
@@ -13,8 +12,6 @@ export default function ItemCard(props: ItemCardProps) {
     <div className={styles.itemCardContainer}>
       {item.is_goal && <div>(g)</div>}
       <div>{item.name}</div>
-      {props.isBlocked && <div>(blocked)</div>}
-      {formatPlanning(item)}
       {item.tags.map((tag) => (
         <div key={tag}>#{tag}</div>
       ))}

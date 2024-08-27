@@ -1,12 +1,20 @@
-import { Item } from "@/interfaces/item";
+import { Item } from "@/interfaces/definitions/item";
+import { ItemSchema } from "@/interfaces/schemas/item-schema";
 
-const parseServerResponseToItem = (serverResponse: any): Item | null => {
-  try {
-    return serverResponse as Item;
-  } catch (e) {
-    console.log(e);
-    return null;
+const parseListAsItems = (raw_item_data: any): Item[] => {
+  if (!Array.isArray(raw_item_data)) {
+    return [];
   }
+  let response = [] as Item[];
+  raw_item_data.forEach((raw_item: any) => {
+    try {
+      ItemSchema.parse(raw_item);
+      response.push(raw_item as Item);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  return response;
 };
 
-export { parseServerResponseToItem };
+export { parseListAsItems };

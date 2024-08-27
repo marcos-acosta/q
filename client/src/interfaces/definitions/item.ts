@@ -1,13 +1,12 @@
 export enum TimeUnit {
-  DAY,
-  WEEK,
-  MONTH,
-  YEAR,
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  YEAR = "YEAR",
 }
 
 export interface CompletionEffort {
-  estimated_time_minutes?: number;
-  frequency?: number;
+  estimated_time_minutes: number;
 }
 
 export interface TimeEffort {
@@ -15,44 +14,45 @@ export interface TimeEffort {
 }
 
 export interface Recurrence {
+  frequency: number;
   inverse_frequency: number;
   unit: TimeUnit;
 }
 
 export interface Planning {
-  completion_effort?: CompletionEffort;
-  time_effort?: TimeEffort;
+  effort?: CompletionEffort | TimeEffort;
   recurrence?: Recurrence;
 }
 
 export interface Log {
-  date: Date;
+  timestamp: number;
+  id: string;
   message: string;
 }
 
 export interface Link {
   label: string;
+  id: string;
   url: string;
 }
 
 export enum PriorityLevel {
-  P0,
-  P1,
-  P2,
-  P3,
-  P4,
+  P0 = "P0",
+  P1 = "P1",
+  P2 = "P2",
+  P3 = "P3",
+  P4 = "P4",
 }
 
 export interface Item {
   name: string;
   id: string;
   dependency_ids: string[];
-  dependent_id?: string;
+  dependent_ids: string[];
   planning?: Planning;
   logs: Log[];
   links: Link[];
   tags: string[];
   priority?: PriorityLevel;
   is_goal?: boolean;
-  is_completed?: boolean;
 }
