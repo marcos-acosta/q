@@ -1,5 +1,4 @@
-import { Item } from "@/interfaces/definitions/item";
-import { ItemSchema } from "@/interfaces/schemas/item-schema";
+import { Item, ItemSchema } from "@/interfaces/item";
 
 const parseListAsItems = (raw_item_data: any): Item[] => {
   if (!Array.isArray(raw_item_data)) {

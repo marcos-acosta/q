@@ -1,4 +1,4 @@
-import { Item } from "@/interfaces/definitions/item";
+import { Item } from "@/interfaces/item";
 import styles from "./../css/ItemCard.module.css";
 // import { formatPlanning } from "@/util/item-utils";
 

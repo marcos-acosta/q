@@ -1,4 +1,4 @@
-import { TimeUnit } from "@/interfaces/definitions/item";
+import { TimeUnit } from "@/interfaces/item";
 
 const MINUTES_IN_HOUR = 60;
 
