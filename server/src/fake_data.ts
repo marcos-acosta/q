@@ -5,7 +5,13 @@ export const ITEMS = [
     creation_timestamp: 1724812240,
     dependency_ids: ["b"],
     tags: ["google", "projects"],
-    priority: "P0",
+    planning: {
+      priority: "P0",
+      time_priority: {
+        amount: 2,
+        unit: "MONTHS",
+      },
+    },
   },
   {
     name: "add spend label into policy layer",
@@ -13,9 +19,7 @@ export const ITEMS = [
     creation_timestamp: 1724812240,
     dependent_ids: ["a"],
     planning: {
-      effort: {
-        estimated_time_minutes: 120,
-      },
+      estimated_completion_time_minutes: 120,
     },
     tags: ["policy layer"],
   },
@@ -24,17 +28,15 @@ export const ITEMS = [
     id: "c",
     creation_timestamp: 1724812240,
     planning: {
-      effort: {
-        estimated_time_minutes: 30,
-      },
-      recurrence: {
+      estimated_completion_time_minutes: 30,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 1,
         unit: "WEEK",
       },
+      priority: "P3",
     },
     tags: ["google"],
-    priority: "P3",
     is_goal: true,
   },
   {
@@ -42,17 +44,15 @@ export const ITEMS = [
     id: "d",
     creation_timestamp: 1724812240,
     planning: {
-      effort: {
-        duration_minutes: 15 * 60,
-      },
-      recurrence: {
+      duration_minutes: 15 * 60,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 1,
         unit: "WEEK",
       },
+      priority: "P1",
     },
     tags: ["piano", "music"],
-    priority: "P1",
     is_goal: true,
   },
   {
@@ -61,17 +61,15 @@ export const ITEMS = [
     creation_timestamp: 1724812240,
     dependency_ids: ["f", "g"],
     planning: {
-      effort: {
-        duration_minutes: 60,
-      },
-      recurrence: {
+      duration_minutes: 60,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 1,
         unit: "WEEK",
       },
+      priority: "P3",
     },
     tags: ["piano", "music"],
-    priority: "P3",
     is_goal: true,
   },
   {
@@ -80,9 +78,7 @@ export const ITEMS = [
     creation_timestamp: 1724812240,
     dependent_ids: ["e"],
     planning: {
-      effort: {
-        estimated_time_minutes: 45,
-      },
+      duration_minutes: 45,
     },
     tags: ["piano", "music"],
   },
@@ -92,9 +88,7 @@ export const ITEMS = [
     creation_timestamp: 1724812240,
     dependent_ids: ["e"],
     planning: {
-      effort: {
-        estimated_time_minutes: 60,
-      },
+      estimated_completion_time_minutes: 60,
     },
     tags: ["piano", "music"],
   },
@@ -103,10 +97,8 @@ export const ITEMS = [
     id: "h",
     creation_timestamp: 1724812240,
     planning: {
-      effort: {
-        duration_minutes: 15 * 60,
-      },
-      recurrence: {
+      duration_minutes: 15 * 60,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 2,
         unit: "WEEK",
@@ -119,14 +111,14 @@ export const ITEMS = [
     id: "i",
     creation_timestamp: 1724812240,
     planning: {
-      recurrence: {
+      time_priority: {
         frequency: 1,
         inverse_frequency: 2,
         unit: "WEEK",
       },
+      priority: "P0",
     },
     tags: ["quartet", "music"],
-    priority: "P0",
     is_goal: true,
   },
   {
@@ -134,14 +126,14 @@ export const ITEMS = [
     id: "j",
     creation_timestamp: 1724812240,
     planning: {
-      recurrence: {
+      time_priority: {
         frequency: 5,
         inverse_frequency: 1,
         unit: "WEEK",
       },
+      priority: "P2",
     },
     tags: ["wellness"],
-    priority: "P2",
     is_goal: true,
   },
   {
@@ -149,14 +141,14 @@ export const ITEMS = [
     id: "k",
     creation_timestamp: 1724812240,
     planning: {
-      recurrence: {
+      time_priority: {
         frequency: 3,
         inverse_frequency: 2,
         unit: "WEEK",
       },
+      priority: "P1",
     },
     tags: ["social"],
-    priority: "P1",
     is_goal: true,
   },
   {
@@ -164,17 +156,15 @@ export const ITEMS = [
     id: "l",
     creation_timestamp: 1724812240,
     planning: {
-      effort: {
-        duration_minutes: 6 * 60,
-      },
-      recurrence: {
+      duration_minutes: 6 * 60,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 2,
         unit: "WEEK",
       },
+      priority: "P2",
     },
     tags: ["social"],
-    priority: "P2",
     is_goal: true,
   },
   {
@@ -182,14 +172,14 @@ export const ITEMS = [
     id: "m",
     creation_timestamp: 1724812240,
     planning: {
-      recurrence: {
+      time_priority: {
         frequency: 2,
         inverse_frequency: 1,
         unit: "MONTH",
       },
+      priority: "P2",
     },
     tags: ["social"],
-    priority: "P2",
     is_goal: true,
   },
   {
@@ -197,17 +187,16 @@ export const ITEMS = [
     id: "n",
     creation_timestamp: 1724812240,
     planning: {
-      effort: {
-        estimated_time_minutes: 105,
-      },
-      recurrence: {
+      estimated_completion_time_minutes: 105,
+      time_priority: {
         frequency: 1,
         inverse_frequency: 2,
         unit: "WEEK",
+        preferred_days: "su",
       },
+      priority: "P1",
     },
     tags: ["errands"],
-    priority: "P1",
   },
 ];
 

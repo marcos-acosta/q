@@ -11,7 +11,7 @@ export default function ItemCard(props: ItemCardProps) {
   return (
     <div className={styles.itemCardContainer}>
       {item.is_goal && <div>(g)</div>}
-      <div>{item.name}</div>
+      <span>{item.name}</span>, <span>{item.planning.priority}</span>
       {item.tags.map((tag) => (
         <div key={tag}>#{tag}</div>
       ))}

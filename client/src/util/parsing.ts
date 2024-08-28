@@ -7,8 +7,8 @@ const parseListAsItems = (raw_item_data: any): Item[] => {
   let response = [] as Item[];
   raw_item_data.forEach((raw_item: any) => {
     try {
-      ItemSchema.parse(raw_item);
-      response.push(raw_item as Item);
+      const parsed_item: Item = ItemSchema.parse(raw_item);
+      response.push(parsed_item);
     } catch (e) {
       console.log(e);
     }

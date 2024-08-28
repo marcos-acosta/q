@@ -15,28 +15,34 @@ export enum TimeUnit {
   YEAR = "YEAR",
 }
 
-const TimeEffortSchema = z.object({
-  duration_minutes: z.number(),
-});
-export type TimeEffort = z.infer<typeof TimeEffortSchema>;
-
-const CompletionEffortSchema = z.object({
-  estimated_time_minutes: z.number(),
-});
-export type CompletionEffort = z.infer<typeof CompletionEffortSchema>;
-
 const RecurrenceSchema = z.object({
   frequency: z.number(),
   inverse_frequency: z.number(),
   unit: z.nativeEnum(TimeUnit),
+  preferred_days: z.optional(z.string()),
 });
 export type Recurrence = z.infer<typeof RecurrenceSchema>;
 
+const UrgencySchema = z.object({
+  amount: z.number(),
+  unit: z.nativeEnum(TimeUnit),
+});
+export type Urgency = z.infer<typeof UrgencySchema>;
+const DEFAULT_URGENCY: Urgency = { unit: TimeUnit.YEAR, amount: 5 };
+
 const PlanningSchema = z.object({
-  effort: z.optional(z.union([TimeEffortSchema, CompletionEffortSchema])),
-  recurrence: z.optional(RecurrenceSchema),
+  duration_minutes: z.optional(z.number()),
+  estimated_completion_time_minutes: z.optional(z.number()),
+  time_priority: z
+    .union([RecurrenceSchema, UrgencySchema])
+    .default(DEFAULT_URGENCY),
+  priority: z.nativeEnum(PriorityLevel).default(PriorityLevel.P4),
 });
 export type Planning = z.infer<typeof PlanningSchema>;
+const DEFAULT_PLANNING: Planning = {
+  time_priority: DEFAULT_URGENCY,
+  priority: PriorityLevel.P4,
+};
 
 const LogSchema = z.object({
   id: z.string(),
@@ -58,11 +64,10 @@ const ItemSchema = z.object({
   creation_timestamp: z.number(),
   dependency_ids: z.array(z.string()).default([]),
   dependent_ids: z.array(z.string()).default([]),
-  planning: z.optional(PlanningSchema),
+  planning: PlanningSchema.default(DEFAULT_PLANNING),
   logs: z.array(LogSchema).default([]),
   links: z.array(LinkSchema).default([]),
   tags: z.array(z.string()).default([]),
-  priority: z.nativeEnum(PriorityLevel).default(PriorityLevel.P4),
   is_goal: z.optional(z.boolean()),
 });
 export type Item = z.infer<typeof ItemSchema>;
