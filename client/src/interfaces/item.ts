@@ -15,34 +15,37 @@ export enum TimeUnit {
   YEAR = "YEAR",
 }
 
+export enum EffortType {
+  COMPLETION = "COMPLETION",
+  DURATION = "DURATION",
+}
+
 const RecurrenceSchema = z.object({
-  frequency: z.number(),
   inverse_frequency: z.number(),
   unit: z.nativeEnum(TimeUnit),
-  preferred_days: z.optional(z.string()),
+  start_date: z.string().date(),
 });
 export type Recurrence = z.infer<typeof RecurrenceSchema>;
 
 const UrgencySchema = z.object({
-  amount: z.number(),
-  unit: z.nativeEnum(TimeUnit),
+  expected_completion_date: z.string().date(),
 });
 export type Urgency = z.infer<typeof UrgencySchema>;
-const DEFAULT_URGENCY: Urgency = { unit: TimeUnit.YEAR, amount: 5 };
 
-const PlanningSchema = z.object({
-  duration_minutes: z.optional(z.number()),
-  estimated_completion_time_minutes: z.optional(z.number()),
-  time_priority: z
-    .union([RecurrenceSchema, UrgencySchema])
-    .default(DEFAULT_URGENCY),
-  priority: z.nativeEnum(PriorityLevel).default(PriorityLevel.P4),
+const TimeSpecSchema = z.object({
+  recurrence: z.optional(RecurrenceSchema),
+  urgency: z.optional(UrgencySchema),
 });
-export type Planning = z.infer<typeof PlanningSchema>;
-const DEFAULT_PLANNING: Planning = {
-  time_priority: DEFAULT_URGENCY,
-  priority: PriorityLevel.P4,
-};
+export type TimeSpec = z.infer<typeof TimeSpecSchema>;
+
+const QuotaSchema = z.object({
+  duration_minutes: z.optional(z.number()),
+  times: z.optional(z.number()),
+  estimated_time_minutes: z.optional(z.number()),
+  effort_type: z.nativeEnum(EffortType),
+});
+export type Quota = z.infer<typeof QuotaSchema>;
+const DEFAULT_QUOTA: Quota = { times: 1, effort_type: EffortType.COMPLETION };
 
 const LogSchema = z.object({
   id: z.string(),
@@ -51,24 +54,43 @@ const LogSchema = z.object({
 });
 export type Log = z.infer<typeof LogSchema>;
 
-const LinkSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  url: z.string(),
+const DateRangeSchema = z.tuple([z.string().date(), z.string().date()]);
+export type DateRange = z.infer<typeof DateRangeSchema>;
+
+const ProgressContributionSchema = z.object({
+  timestamp: z.number(),
+  contribution_times: z.optional(z.number()),
+  contribution_minutes: z.optional(z.number()),
+  contribution_type: z.nativeEnum(EffortType),
 });
-export type Link = z.infer<typeof LinkSchema>;
+export type ProgressContribution = z.infer<typeof ProgressContributionSchema>;
+
+const LoggedProgressSchema = z.object({
+  date_range: DateRangeSchema,
+  progress_contributions: z.array(ProgressContributionSchema),
+});
+export type LoggedProgress = z.infer<typeof LoggedProgressSchema>;
+
+const ProgressSchema = z.object({
+  logged_progress: z.array(LoggedProgressSchema),
+});
+export type Progress = z.infer<typeof ProgressSchema>;
+const DEFAULT_PROGRESS: Progress = { logged_progress: [] };
 
 const ItemSchema = z.object({
   name: z.string(),
-  id: z.string(),
+  _id: z.string(),
   creation_timestamp: z.number(),
   dependency_ids: z.array(z.string()).default([]),
   dependent_ids: z.array(z.string()).default([]),
-  planning: PlanningSchema.default(DEFAULT_PLANNING),
+  quota: QuotaSchema.default(DEFAULT_QUOTA),
+  progress: ProgressSchema.default(DEFAULT_PROGRESS),
+  time_spec: z.optional(TimeSpecSchema),
+  priority: z.nativeEnum(PriorityLevel).default(PriorityLevel.P4),
   logs: z.array(LogSchema).default([]),
-  links: z.array(LinkSchema).default([]),
   tags: z.array(z.string()).default([]),
-  is_goal: z.optional(z.boolean()),
+  is_goal: z.boolean().default(false),
+  is_archived: z.boolean().default(false),
 });
 export type Item = z.infer<typeof ItemSchema>;
 

@@ -1,27 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchItems } from "../server/items";
 import ItemCard from "./ItemCard";
-import { parseListAsItems } from "@/util/parsing";
 import { Item } from "@/interfaces/item";
 
-export default function ItemList() {
-  const [items, setActions] = useState(null as null | Item[]);
-  const [isLoading, setIsLoading] = useState(true);
+export interface ItemListProps {
+  items: Item[];
+  isLoading: boolean;
+}
 
-  useEffect(() => {
-    fetchItems().then((data) => {
-      setActions(parseListAsItems(data));
-      setIsLoading(false);
-    });
-  }, []);
-
+export default function ItemList(props: ItemListProps) {
   return (
     <div>
-      {!isLoading &&
-        items &&
-        items.map((item) => <ItemCard item={item} key={item.id} />)}
+      {props.isLoading
+        ? "loading..."
+        : props.items.map((item: Item) => (
+            <ItemCard item={item} key={item._id} />
+          ))}
     </div>
   );
 }

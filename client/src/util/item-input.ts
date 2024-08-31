@@ -1,0 +1,128 @@
+import { EffortType, Item, ItemSchema, PriorityLevel } from "@/interfaces/item";
+import { regex } from "regex";
+import {
+  parsePriority,
+  parseTimeDurationToMinutes,
+  parseTimeInterval,
+  TimeInterval,
+} from "./parsing";
+import { v4 as uuidv4 } from "uuid";
+import { addIntervalToDate, getNearestStartDate } from "./dates";
+
+const regex_no_x = regex({
+  disable: { x: true },
+});
+const regex_g_no_x = regex({ flags: "g", disable: { x: true } });
+
+const TASK_NAME_PATTERN = regex_no_x`^(?<name>.+?)($|( [\-#]))`;
+const DURATION_PATTERN = regex_no_x` -t (?<duration_minutes>(\d)+[hm])\b`;
+const TIMES_PATTERN = regex_no_x` -x (?<times>(\d)+)\b`;
+const RECURRENCE_PATTERN = regex_no_x` -e (?<recurrence>(\d)*[dwmy])\b`;
+const URGENCY_PATTERN = regex_no_x` -u (?<urgency>(\d)*[dwmy])\b`;
+const PRIORITY_PATTERN = regex_no_x` -p(?<priority>[0-4])\b`;
+const TAG_PATTERN = regex_g_no_x` #(?<tag>[^\s]+)\b`;
+const DURATION_BASED_FLAG = regex_no_x` -d\b`;
+const GOAL_FLAG = regex_no_x` -g\b`;
+
+const matchItemInputPart = (
+  item_spec: string,
+  pattern: RegExp,
+  parser?: (a: string) => any,
+  group_name?: string
+) => {
+  const matches = item_spec.match(pattern);
+  let response;
+  if (parser && group_name) {
+    if (matches?.groups && matches.groups[group_name]) {
+      response = parser(matches.groups[group_name]);
+    }
+  } else {
+    return Boolean(matches);
+  }
+  return response;
+};
+
+const matchTags = (item_spec: string): string[] => {
+  const matches = item_spec.matchAll(TAG_PATTERN);
+  let tags = [];
+  for (const match of matches) {
+    if (match.groups && match.groups["tag"]) {
+      tags.push(match.groups["tag"]);
+    }
+  }
+  return tags;
+};
+
+const constructPartialItemFromResults = (results: {
+  [a: string]: any;
+}): Partial<Item> => {
+  const recurrence = results["recurrence"] as undefined | TimeInterval;
+  const urgency = results["urgency"] as undefined | TimeInterval;
+  const duration_minutes = results["duration_minutes"] as undefined | number;
+  const times = results["times"] as undefined | number;
+  const priority = results["priority"] as undefined | PriorityLevel;
+  const is_duration_effort = results["is_duration_based"];
+  let item: Partial<Item> = {
+    name: results["name"],
+    _id: uuidv4(),
+    creation_timestamp: Date.now(),
+    dependency_ids: [],
+    dependent_ids: [],
+    quota: {
+      effort_type: is_duration_effort
+        ? EffortType.DURATION
+        : EffortType.COMPLETION,
+      duration_minutes: is_duration_effort ? duration_minutes : undefined,
+      estimated_time_minutes: is_duration_effort ? undefined : duration_minutes,
+      times: times,
+    },
+    time_spec: {
+      recurrence: recurrence
+        ? {
+            inverse_frequency: recurrence.quantity,
+            unit: recurrence.unit,
+            start_date: getNearestStartDate(recurrence.unit),
+          }
+        : undefined,
+      urgency: urgency
+        ? {
+            expected_completion_date: addIntervalToDate(
+              getNearestStartDate(urgency.unit),
+              urgency
+            ),
+          }
+        : undefined,
+    },
+    tags: results["tags"],
+    is_goal: results["is_goal"],
+    priority: priority,
+  };
+  return item;
+};
+
+export const parseItemInput = (item_spec: string): Item => {
+  const parsers: Array<[RegExp, ((a: string) => any) | undefined, string]> = [
+    [TASK_NAME_PATTERN, (x: string) => x, "name"],
+    [DURATION_PATTERN, parseTimeDurationToMinutes, "duration_minutes"],
+    [RECURRENCE_PATTERN, parseTimeInterval, "recurrence"],
+    [URGENCY_PATTERN, parseTimeInterval, "urgency"],
+    [TIMES_PATTERN, parseInt, "times"],
+    [PRIORITY_PATTERN, parsePriority, "priority"],
+    [DURATION_BASED_FLAG, undefined, "is_duration_based"],
+    [GOAL_FLAG, undefined, "is_goal"],
+  ];
+
+  const parseResults: { [key: string]: any } = {};
+  parsers.forEach(([pattern, parser, group_name]) => {
+    try {
+      const res = matchItemInputPart(item_spec, pattern, parser, group_name);
+      parseResults[group_name] = res;
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  });
+  parseResults["tags"] = matchTags(item_spec);
+  const partialItem = constructPartialItemFromResults(parseResults);
+  return ItemSchema.parse(partialItem);
+};
