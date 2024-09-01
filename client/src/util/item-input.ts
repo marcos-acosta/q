@@ -1,6 +1,7 @@
 import { EffortType, Item, ItemSchema, PriorityLevel } from "@/interfaces/item";
 import { regex } from "regex";
 import {
+  parseDateToIso,
   parsePriority,
   parseTimeDurationToMinutes,
   parseTimeInterval,
@@ -19,6 +20,7 @@ const DURATION_PATTERN = regex_no_x` -t (?<duration_minutes>(\d)+[hm])\b`;
 const TIMES_PATTERN = regex_no_x` -x (?<times>(\d)+)\b`;
 const RECURRENCE_PATTERN = regex_no_x` -e (?<recurrence>(\d)*[dwmy])\b`;
 const URGENCY_PATTERN = regex_no_x` -u (?<urgency>(\d)*[dwmy])\b`;
+const HARD_DEADLINE_PATTERN = regex_no_x` -h (?<hard_deadline>[0-9a-zA-Z\-]+)\b`;
 const PRIORITY_PATTERN = regex_no_x` -p(?<priority>[0-4])\b`;
 const TAG_PATTERN = regex_g_no_x` #(?<tag>[^\s]+)\b`;
 const DURATION_BASED_FLAG = regex_no_x` -d\b`;
@@ -53,19 +55,26 @@ const matchTags = (item_spec: string): string[] => {
   return tags;
 };
 
-const constructPartialItemFromResults = (results: {
-  [a: string]: any;
-}): Partial<Item> => {
+const constructPartialItemFromResults = (
+  results: {
+    [a: string]: any;
+  },
+  spec: string
+): Partial<Item> => {
   const recurrence = results["recurrence"] as undefined | TimeInterval;
   const urgency = results["urgency"] as undefined | TimeInterval;
   const duration_minutes = results["duration_minutes"] as undefined | number;
   const times = results["times"] as undefined | number;
   const priority = results["priority"] as undefined | PriorityLevel;
   const is_duration_effort = results["is_duration_based"];
+  const hard_deadline = results["hard_deadline"];
+  const expected_completion_date =
+    urgency && addIntervalToDate(getNearestStartDate(urgency.unit), urgency);
   let item: Partial<Item> = {
     name: results["name"],
     _id: uuidv4(),
     creation_timestamp: Date.now(),
+    creation_spec: spec,
     dependency_ids: [],
     dependent_ids: [],
     quota: {
@@ -84,14 +93,10 @@ const constructPartialItemFromResults = (results: {
             start_date: getNearestStartDate(recurrence.unit),
           }
         : undefined,
-      urgency: urgency
-        ? {
-            expected_completion_date: addIntervalToDate(
-              getNearestStartDate(urgency.unit),
-              urgency
-            ),
-          }
-        : undefined,
+      urgency: {
+        expected_completion_date: expected_completion_date,
+        hard_deadline: hard_deadline,
+      },
     },
     tags: results["tags"],
     is_goal: results["is_goal"],
@@ -108,6 +113,7 @@ export const parseItemInput = (item_spec: string): Item => {
     [URGENCY_PATTERN, parseTimeInterval, "urgency"],
     [TIMES_PATTERN, parseInt, "times"],
     [PRIORITY_PATTERN, parsePriority, "priority"],
+    [HARD_DEADLINE_PATTERN, parseDateToIso, "hard_deadline"],
     [DURATION_BASED_FLAG, undefined, "is_duration_based"],
     [GOAL_FLAG, undefined, "is_goal"],
   ];
@@ -123,6 +129,6 @@ export const parseItemInput = (item_spec: string): Item => {
     }
   });
   parseResults["tags"] = matchTags(item_spec);
-  const partialItem = constructPartialItemFromResults(parseResults);
+  const partialItem = constructPartialItemFromResults(parseResults, item_spec);
   return ItemSchema.parse(partialItem);
 };

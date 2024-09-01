@@ -28,7 +28,8 @@ const RecurrenceSchema = z.object({
 export type Recurrence = z.infer<typeof RecurrenceSchema>;
 
 const UrgencySchema = z.object({
-  expected_completion_date: z.string().date(),
+  expected_completion_date: z.optional(z.string().date()),
+  hard_deadline: z.optional(z.string().date()),
 });
 export type Urgency = z.infer<typeof UrgencySchema>;
 
@@ -80,6 +81,7 @@ const DEFAULT_PROGRESS: Progress = { logged_progress: [] };
 const ItemSchema = z.object({
   name: z.string(),
   _id: z.string(),
+  creation_spec: z.string(),
   creation_timestamp: z.number(),
   dependency_ids: z.array(z.string()).default([]),
   dependent_ids: z.array(z.string()).default([]),

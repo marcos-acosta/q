@@ -11,7 +11,7 @@ export interface AddNewItemProps {
 export default function AddNewItem(props: AddNewItemProps) {
   const [itemSpec, setItemSpec] = useState("");
 
-  const addItem = async () => {
+  const addItem = () => {
     try {
       const item: Item = parseItemInput(itemSpec);
       props.addItem(item);

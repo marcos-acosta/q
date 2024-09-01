@@ -14,7 +14,7 @@ export default function ItemList(props: ItemListProps) {
       {props.isLoading
         ? "loading..."
         : props.items.map((item: Item) => (
-            <ItemCard item={item} key={item._id} />
+            <ItemCard item={item} key={item._id.toString()} />
           ))}
     </div>
   );

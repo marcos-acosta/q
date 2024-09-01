@@ -1,5 +1,6 @@
 import { Item, ItemSchema, PriorityLevel, TimeUnit } from "@/interfaces/item";
 import { regex } from "regex";
+import { formatDateIso } from "./dates";
 
 const LETTER_TO_TIME_UNIT: { [key: string]: TimeUnit } = {
   d: TimeUnit.DAY,
@@ -7,6 +8,21 @@ const LETTER_TO_TIME_UNIT: { [key: string]: TimeUnit } = {
   m: TimeUnit.MONTH,
   y: TimeUnit.YEAR,
 };
+
+const MONTHS_3_LETTERS = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
 
 export interface TimeInterval {
   quantity: number;
@@ -74,4 +90,39 @@ export const parsePriority = (priority_string: string): PriorityLevel => {
     PriorityLevel.P3,
     PriorityLevel.P4,
   ][priority];
+};
+
+export const parseDateToIso = (date_string: string): string => {
+  let full_date_string = "";
+  if (date_string.match(regex`\d{4}-\d{2}-\d{2}`)) {
+    full_date_string = date_string;
+  } else if (date_string.match(regex`\d{2}-\d{2}`)) {
+    const [month, day] = date_string.split("-");
+    let now = new Date();
+    now.setMonth(parseInt(month) - 1);
+    now.setDate(parseInt(day));
+    if (now < new Date()) {
+      now.setFullYear(now.getFullYear() + 1);
+    }
+    full_date_string = formatDateIso(now);
+  } else if (date_string.match(regex`\w{3}-\d{1,2}`)) {
+    const [month, day] = date_string.split("-");
+    const month_index = MONTHS_3_LETTERS.indexOf(month);
+    if (month_index === -1) {
+      throw Error(`Unrecognized month: ${month}`);
+    }
+    let now = new Date();
+    now.setMonth(month_index);
+    now.setDate(parseInt(day));
+    if (now < new Date()) {
+      now.setFullYear(now.getFullYear() + 1);
+    }
+    full_date_string = formatDateIso(now);
+  } else {
+    throw Error(`Could not parse date: ${date_string}`);
+  }
+  if (isNaN(new Date(full_date_string) as any)) {
+    throw Error(`Could not treat ${full_date_string} as a valid date.`);
+  }
+  return full_date_string;
 };
