@@ -8,7 +8,11 @@ import {
   TimeInterval,
 } from "./parsing";
 import { v4 as uuidv4 } from "uuid";
-import { addIntervalToDate, getNearestStartDate } from "./dates";
+import {
+  addIntervalToDate,
+  formatDateIso,
+  getStartOfPreviousPeriod,
+} from "./dates";
 
 const regex_no_x = regex({
   disable: { x: true },
@@ -69,10 +73,14 @@ const constructPartialItemFromResults = (
   const is_duration_effort = results["is_duration_based"];
   const hard_deadline = results["hard_deadline"];
   const expected_completion_date =
-    urgency && addIntervalToDate(getNearestStartDate(urgency.unit), urgency);
+    urgency &&
+    addIntervalToDate(
+      formatDateIso(getStartOfPreviousPeriod(new Date(), urgency.unit)),
+      urgency
+    );
   let item: Partial<Item> = {
     name: results["name"],
-    _id: uuidv4(),
+    id: uuidv4(),
     creation_timestamp: Date.now(),
     creation_spec: spec,
     dependency_ids: [],
@@ -83,14 +91,16 @@ const constructPartialItemFromResults = (
         : EffortType.COMPLETION,
       duration_minutes: is_duration_effort ? duration_minutes : undefined,
       estimated_time_minutes: is_duration_effort ? undefined : duration_minutes,
-      times: times,
+      times: is_duration_effort ? undefined : times ? times : 1,
     },
     time_spec: {
       recurrence: recurrence
         ? {
             inverse_frequency: recurrence.quantity,
             unit: recurrence.unit,
-            start_date: getNearestStartDate(recurrence.unit),
+            start_date: formatDateIso(
+              getStartOfPreviousPeriod(new Date(), recurrence.unit)
+            ),
           }
         : undefined,
       urgency: {

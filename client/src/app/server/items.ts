@@ -1,6 +1,6 @@
 "use server";
 
-import { Item } from "@/interfaces/item";
+import { Item, ProgressContribution } from "@/interfaces/item";
 import { parseListAsItems } from "@/util/parsing";
 import axios from "axios";
 
@@ -14,5 +14,11 @@ export async function fetchItems(): Promise<Item[]> {
 export async function addItemToDb(item: Item) {
   return await axios
     .post("http://localhost:3000/items", item)
+    .then((response) => response.data);
+}
+
+export async function updateItemInDb(item: Item) {
+  return await axios
+    .post(`http://localhost:3000/items/${item.id}`, item)
     .then((response) => response.data);
 }

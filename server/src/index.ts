@@ -48,6 +48,18 @@ app.post("/items", async (req, res) => {
   }
 });
 
+app.post("/items/:id", async (req, res) => {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const items = client.db("q").collection("items");
+    res.send(await items.replaceOne({ id: req.params.id }, req.body));
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server is up.");
 });

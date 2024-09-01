@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import AddNewItem from "./components/AddNewItem";
 import ItemList from "./components/ItemList";
-import { Item } from "@/interfaces/item";
-import { addItemToDb, fetchItems } from "./server/items";
+import { Item, ProgressContribution } from "@/interfaces/item";
+import { addItemToDb, fetchItems, updateItemInDb } from "./server/items";
+import { updateItemWithProgress } from "@/util/progress";
 
 export default function Q() {
   const [items, setItems] = useState([] as Item[]);
@@ -26,10 +27,24 @@ export default function Q() {
     }
   };
 
+  const addProgress = (progress: ProgressContribution, item: Item) => {
+    try {
+      const new_item = updateItemWithProgress(item, progress);
+      updateItemInDb(new_item).then((response) => console.log(response));
+      setItems(items.map((item_) => (item_.id === item.id ? new_item : item_)));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <>
       <AddNewItem addItem={addItem} />
-      <ItemList items={items} isLoading={isLoading} />
+      <ItemList
+        items={items.filter((item) => !item.is_archived)}
+        isLoading={isLoading}
+        addProgress={addProgress}
+      />
     </>
   );
 }

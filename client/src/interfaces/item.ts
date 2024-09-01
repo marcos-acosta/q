@@ -55,10 +55,14 @@ const LogSchema = z.object({
 });
 export type Log = z.infer<typeof LogSchema>;
 
-const DateRangeSchema = z.tuple([z.string().date(), z.string().date()]);
+const DateRangeSchema = z.object({
+  start_date_inclusive: z.string().date(),
+  end_date_exclusive: z.string().date(),
+});
 export type DateRange = z.infer<typeof DateRangeSchema>;
 
 const ProgressContributionSchema = z.object({
+  date_range: DateRangeSchema,
   timestamp: z.number(),
   contribution_times: z.optional(z.number()),
   contribution_minutes: z.optional(z.number()),
@@ -66,21 +70,15 @@ const ProgressContributionSchema = z.object({
 });
 export type ProgressContribution = z.infer<typeof ProgressContributionSchema>;
 
-const LoggedProgressSchema = z.object({
-  date_range: DateRangeSchema,
+const ProgressSchema = z.object({
   progress_contributions: z.array(ProgressContributionSchema),
 });
-export type LoggedProgress = z.infer<typeof LoggedProgressSchema>;
-
-const ProgressSchema = z.object({
-  logged_progress: z.array(LoggedProgressSchema),
-});
 export type Progress = z.infer<typeof ProgressSchema>;
-const DEFAULT_PROGRESS: Progress = { logged_progress: [] };
+const DEFAULT_PROGRESS: Progress = { progress_contributions: [] };
 
 const ItemSchema = z.object({
   name: z.string(),
-  _id: z.string(),
+  id: z.string(),
   creation_spec: z.string(),
   creation_timestamp: z.number(),
   dependency_ids: z.array(z.string()).default([]),
