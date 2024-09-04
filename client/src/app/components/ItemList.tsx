@@ -1,12 +1,12 @@
 "use client";
 
 import ItemCard from "./ItemCard";
-import { Item, ProgressContribution } from "@/interfaces/item";
+import { Item, Progress } from "@/interfaces/item";
 
 export interface ItemListProps {
   items: Item[];
   isLoading: boolean;
-  addProgress: (p: ProgressContribution, i: Item) => void;
+  addProgress: (p: Progress, i: Item) => void;
 }
 
 export default function ItemList(props: ItemListProps) {

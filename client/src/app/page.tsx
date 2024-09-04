@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AddNewItem from "./components/AddNewItem";
 import ItemList from "./components/ItemList";
-import { Item, ProgressContribution } from "@/interfaces/item";
+import { Item, Progress } from "@/interfaces/item";
 import { addItemToDb, fetchItems, updateItemInDb } from "./server/items";
 import { updateItemWithProgress } from "@/util/progress";
 
@@ -27,7 +27,7 @@ export default function Q() {
     }
   };
 
-  const addProgress = (progress: ProgressContribution, item: Item) => {
+  const addProgress = (progress: Progress, item: Item) => {
     try {
       const new_item = updateItemWithProgress(item, progress);
       updateItemInDb(new_item).then((response) => console.log(response));

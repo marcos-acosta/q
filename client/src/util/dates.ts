@@ -69,18 +69,21 @@ export const addIntervalToDate = (
   return formatDateIso(addFn(start_date, interval.quantity));
 };
 
-const getCurrentPeriodFromUnit = (unit: TimeUnit): DateRange => {
-  const today = new Date();
+export const getPeriodFromDate = (date: Date, unit: TimeUnit): DateRange => {
   return {
-    start_date_inclusive: formatDateIso(getStartOfPreviousPeriod(today, unit)),
-    end_date_exclusive: formatDateIso(getStartOfNextPeriod(today, unit)),
+    start_date_inclusive: formatDateIso(getStartOfPreviousPeriod(date, unit)),
+    end_date_exclusive: formatDateIso(getStartOfNextPeriod(date, unit)),
   };
 };
 
-export const getCurrentPeriodForItem = (item: Item): DateRange => {
+export const getPeriodForItem = (date: Date, item: Item): DateRange => {
   let unit = TimeUnit.DAY;
   if (item.time_spec?.recurrence) {
     unit = item.time_spec.recurrence.unit;
   }
-  return getCurrentPeriodFromUnit(unit);
+  return getPeriodFromDate(date, unit);
 };
+
+export const dateRangesEqual = (d1: DateRange, d2: DateRange) =>
+  d1.end_date_exclusive == d2.end_date_exclusive &&
+  d1.start_date_inclusive === d2.start_date_inclusive;

@@ -83,16 +83,11 @@ const constructPartialItemFromResults = (
     id: uuidv4(),
     creation_timestamp: Date.now(),
     creation_spec: spec,
+    effort_type: is_duration_effort
+      ? EffortType.DURATION
+      : EffortType.COMPLETION,
     dependency_ids: [],
     dependent_ids: [],
-    quota: {
-      effort_type: is_duration_effort
-        ? EffortType.DURATION
-        : EffortType.COMPLETION,
-      duration_minutes: is_duration_effort ? duration_minutes : undefined,
-      estimated_time_minutes: is_duration_effort ? undefined : duration_minutes,
-      times: is_duration_effort ? undefined : times ? times : 1,
-    },
     time_spec: {
       recurrence: recurrence
         ? {
@@ -107,6 +102,17 @@ const constructPartialItemFromResults = (
         expected_completion_date: expected_completion_date,
         hard_deadline: hard_deadline,
       },
+      required_time_effort_minutes: is_duration_effort
+        ? duration_minutes
+        : undefined,
+      estimated_time_effort_minutes: is_duration_effort
+        ? undefined
+        : duration_minutes,
+      required_number_of_completions: is_duration_effort
+        ? undefined
+        : times
+        ? times
+        : 1,
     },
     tags: results["tags"],
     is_goal: results["is_goal"],

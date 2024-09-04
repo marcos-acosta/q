@@ -1,6 +1,6 @@
 "use server";
 
-import { Item, ProgressContribution } from "@/interfaces/item";
+import { Item } from "@/interfaces/item";
 import { parseListAsItems } from "@/util/parsing";
 import axios from "axios";
 

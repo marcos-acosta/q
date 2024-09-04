@@ -36,17 +36,11 @@ export type Urgency = z.infer<typeof UrgencySchema>;
 const TimeSpecSchema = z.object({
   recurrence: z.optional(RecurrenceSchema),
   urgency: z.optional(UrgencySchema),
+  estimated_time_effort_minutes: z.optional(z.number()),
+  required_time_effort_minutes: z.optional(z.number()),
+  required_number_of_completions: z.optional(z.number()),
 });
 export type TimeSpec = z.infer<typeof TimeSpecSchema>;
-
-const QuotaSchema = z.object({
-  duration_minutes: z.optional(z.number()),
-  times: z.optional(z.number()),
-  estimated_time_minutes: z.optional(z.number()),
-  effort_type: z.nativeEnum(EffortType),
-});
-export type Quota = z.infer<typeof QuotaSchema>;
-const DEFAULT_QUOTA: Quota = { times: 1, effort_type: EffortType.COMPLETION };
 
 const LogSchema = z.object({
   id: z.string(),
@@ -61,30 +55,22 @@ const DateRangeSchema = z.object({
 });
 export type DateRange = z.infer<typeof DateRangeSchema>;
 
-const ProgressContributionSchema = z.object({
-  date_range: DateRangeSchema,
+const ProgressSchema = z.object({
   timestamp: z.number(),
   contribution_times: z.optional(z.number()),
   contribution_minutes: z.optional(z.number()),
-  contribution_type: z.nativeEnum(EffortType),
-});
-export type ProgressContribution = z.infer<typeof ProgressContributionSchema>;
-
-const ProgressSchema = z.object({
-  progress_contributions: z.array(ProgressContributionSchema),
 });
 export type Progress = z.infer<typeof ProgressSchema>;
-const DEFAULT_PROGRESS: Progress = { progress_contributions: [] };
 
 const ItemSchema = z.object({
   name: z.string(),
   id: z.string(),
   creation_spec: z.string(),
   creation_timestamp: z.number(),
+  effort_type: z.nativeEnum(EffortType).default(EffortType.COMPLETION),
   dependency_ids: z.array(z.string()).default([]),
   dependent_ids: z.array(z.string()).default([]),
-  quota: QuotaSchema.default(DEFAULT_QUOTA),
-  progress: ProgressSchema.default(DEFAULT_PROGRESS),
+  progress: z.array(ProgressSchema).default([]),
   time_spec: z.optional(TimeSpecSchema),
   priority: z.nativeEnum(PriorityLevel).default(PriorityLevel.P4),
   logs: z.array(LogSchema).default([]),
