@@ -3,6 +3,7 @@
 import ItemCard from "./ItemCard";
 import { Item, Progress } from "@/interfaces/item";
 import styles from "./../css/ItemList.module.css";
+import { basicSortItems } from "@/util/sorting";
 
 export interface ItemListProps {
   items: Item[];
@@ -12,13 +13,15 @@ export interface ItemListProps {
 }
 
 export default function ItemList(props: ItemListProps) {
+  const sortedItems = basicSortItems(props.items);
+
   return (
     <div>
       {props.isLoading ? (
         "loading..."
       ) : (
         <div className={styles.itemListContainer}>
-          {props.items.map((item: Item) => (
+          {sortedItems.map((item: Item) => (
             <div key={item.id}>
               <ItemCard
                 item={item}

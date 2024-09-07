@@ -1,10 +1,11 @@
 import { THEME_COLORS } from "@/util/css";
-import styles from "./../css/ProgressBar.module.css";
+import styles from "./../css/ProgressCircle.module.css";
 
 export interface ProgressCircleProps {
   completed: number;
   total: number;
   onClick: () => void;
+  styles?: Object;
 }
 
 export default function ProgressCircle(props: ProgressCircleProps) {
@@ -14,10 +15,11 @@ export default function ProgressCircle(props: ProgressCircleProps) {
   );
   return (
     <div
-      className={styles.progressBar}
+      className={styles.progressCircle}
       onClick={props.onClick}
       style={{
         background: `conic-gradient( ${THEME_COLORS.black}, ${percentage}%, transparent 0)`,
+        ...props.styles,
       }}
     />
   );

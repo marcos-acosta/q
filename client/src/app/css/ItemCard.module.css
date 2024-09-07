@@ -11,6 +11,8 @@
   margin-right: 15px;
   display: flex;
   align-items: center;
+  position: relative;
+  background-color: coral;
 }
 
 .itemNameAndActionsContainer {

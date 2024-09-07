@@ -94,7 +94,9 @@ const convertUrgencyToWords = (item: Item): string | null => {
         item.time_spec.urgency.hard_deadline
       )}`;
     } else if (item.time_spec.urgency.expected_completion_date) {
-      return `by ${item.time_spec.urgency.expected_completion_date}`;
+      return `by ${formatDateToWordsRelative(
+        item.time_spec.urgency.expected_completion_date
+      )}`;
     } else {
       return null;
     }

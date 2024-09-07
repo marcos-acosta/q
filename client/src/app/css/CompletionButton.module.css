@@ -1,0 +1,20 @@
+.completionContainer {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--theme-black);
+  height: 30px;
+  border-radius: 30px;
+  position: absolute;
+  right: 0;
+}
+
+.durationInput {
+  display: inline-block;
+  border: none;
+  font-size: 14pt;
+  background-color: transparent;
+  padding-left: 15px;
+  padding-right: 15px;
+  transition-property: width, padding-left, padding-right;
+  transition-duration: 0.5s;
+}

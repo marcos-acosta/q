@@ -11,6 +11,7 @@ import {
 import ProgressCircle from "./ProgressCircle";
 import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
 import { joinNodes } from "@/util/jsx-util";
+import CompletionButton from "./CompletionButton";
 
 interface ItemCardProps {
   item: Item;
@@ -33,24 +34,14 @@ export default function ItemCard(props: ItemCardProps) {
       item
     );
 
-  const addDurationProgress = () => {
-    try {
-      props.addProgress(
-        {
-          timestamp: Date.now(),
-          contribution_minutes: parseTimeDurationToMinutes(timeInput),
-        },
-        item
-      );
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const handleCompletionClick = () => {
-    if (item.effort_type === EffortType.COMPLETION) {
-      addOneTimeProgress();
-    }
+  const addDurationProgress = (duration_minutes: number) => {
+    props.addProgress(
+      {
+        timestamp: Date.now(),
+        contribution_minutes: duration_minutes,
+      },
+      item
+    );
   };
 
   const tagsElement = item.tags.length > 0 && (
@@ -83,10 +74,12 @@ export default function ItemCard(props: ItemCardProps) {
     >
       <div className={styles.itemCardContainer}>
         <div className={styles.completeBox}>
-          <ProgressCircle
+          <CompletionButton
             completed={completionStatus.progress}
             total={completionStatus.quota || 1}
-            onClick={handleCompletionClick}
+            effortType={item.effort_type}
+            addCompletionTimes={addOneTimeProgress}
+            addCompletionDuration={addDurationProgress}
           />
         </div>
         <div className={styles.itemNameAndActionsContainer}>

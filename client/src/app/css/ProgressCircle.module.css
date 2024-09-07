@@ -1,0 +1,8 @@
+.progressCircle {
+  width: 30px;
+  height: 30px;
+  /* outline: 2px solid var(--theme-black); */
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+}
