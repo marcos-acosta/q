@@ -37,6 +37,16 @@ export default function Q() {
     }
   };
 
+  const archive = (item: Item) => {
+    try {
+      const new_item: Item = { ...item, is_archived: true };
+      updateItemInDb(new_item).then((response) => console.log(response));
+      setItems(items.map((item_) => (item_.id === item.id ? new_item : item_)));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <>
       <AddNewItem addItem={addItem} />
@@ -44,6 +54,7 @@ export default function Q() {
         items={items.filter((item) => !item.is_archived)}
         isLoading={isLoading}
         addProgress={addProgress}
+        archive={archive}
       />
     </>
   );

@@ -1,13 +1,22 @@
 body {
   font-size: 18pt;
-  --theme-blue: #c6d8ea;
-  --theme-green: #c8dac6;
+  --theme-black: #2e2e2e;
+  --theme-gray: rgb(110, 111, 119);
 }
 
 button {
   background-color: unset;
   border: unset;
   cursor: pointer;
+}
+
+input {
+  font-family: unset;
+  font-size: unset;
+}
+
+input:focus {
+  outline: unset;
 }
 
 .material-symbols-outlined {

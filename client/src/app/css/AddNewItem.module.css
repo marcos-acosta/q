@@ -1,0 +1,31 @@
+.inputBox {
+  border: 2px solid var(--theme-black);
+  height: 40px;
+  border-radius: 25px;
+  padding-left: 30px;
+  padding-right: 30px;
+  text-align: center;
+}
+
+.itemInputContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.addItemButton {
+  background-color: var(--theme-black);
+  height: 44px;
+  width: 44px;
+  border-radius: 22px;
+  margin-left: 10px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.whiteIcon {
+  color: white;
+}

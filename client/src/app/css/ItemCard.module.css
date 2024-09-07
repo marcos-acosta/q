@@ -1,5 +1,52 @@
 .itemCardContainer {
-  border: 1px solid black;
-  margin-bottom: 6px;
-  padding: 8px;
+  margin-bottom: 20px;
+  display: inline-grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: 50px 50px;
+}
+
+.completeBox {
+  grid-column: 1;
+  grid-row: 1;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.itemNameAndActionsContainer {
+  grid-column: 2;
+  grid-row: 1;
+  max-width: 1000px;
+  display: flex;
+  align-items: baseline;
+}
+
+.itemName {
+  font-size: 24pt;
+  font-weight: bold;
+}
+
+.actions {
+  margin-left: 40px;
+}
+
+.info {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 1000px;
+  font-style: italic;
+  color: var(--theme-gray);
+}
+
+.bulletPoint {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.tag {
+  padding-right: 10px;
+}
+
+.actionButton {
+  color: var(--theme-black);
 }

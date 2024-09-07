@@ -46,7 +46,7 @@ export const getItemCompletionStatus = (item: Item, date: Date) => {
   const effort_type = item.effort_type;
   const progress = item_completion[effort_type];
   const required = quota[effort_type];
-  const is_completed = required ? progress > required : progress > 0;
+  const is_completed = required ? progress >= required : progress > 0;
   return {
     progress: progress,
     quota: required,

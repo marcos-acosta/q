@@ -78,6 +78,7 @@ const constructPartialItemFromResults = (
       formatDateIso(getStartOfPreviousPeriod(new Date(), urgency.unit)),
       urgency
     );
+  const urgency_exists = expected_completion_date || hard_deadline;
   let item: Partial<Item> = {
     name: results["name"],
     id: uuidv4(),
@@ -98,10 +99,12 @@ const constructPartialItemFromResults = (
             ),
           }
         : undefined,
-      urgency: {
-        expected_completion_date: expected_completion_date,
-        hard_deadline: hard_deadline,
-      },
+      urgency: urgency_exists
+        ? {
+            expected_completion_date: expected_completion_date,
+            hard_deadline: hard_deadline,
+          }
+        : undefined,
       required_time_effort_minutes: is_duration_effort
         ? duration_minutes
         : undefined,
