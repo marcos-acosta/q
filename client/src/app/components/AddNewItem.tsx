@@ -5,6 +5,7 @@ import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
 import { parseItemInput } from "@/util/item-input";
 import { useState } from "react";
 import styles from "@/app/css/AddNewItem.module.css";
+import { callbackOnEnter } from "@/util/jsx-util";
 
 export interface AddNewItemProps {
   addItem: (i: Item) => void;
@@ -30,6 +31,7 @@ export default function AddNewItem(props: AddNewItemProps) {
         onChange={(e) => setItemSpec(e.target.value)}
         className={combineClasses(styles.inputBox, SOURCE_CODE_PRO.className)}
         size={Math.max(itemSpec.length, 20)}
+        onKeyDown={(e) => callbackOnEnter(e, addItem)}
       />
       <button onClick={addItem} className={styles.addItemButton}>
         <span

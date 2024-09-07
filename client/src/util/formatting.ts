@@ -1,6 +1,29 @@
 import { EffortType, Item, TimeUnit } from "@/interfaces/item";
+import { differenceInCalendarDays } from "date-fns";
+import moment from "moment";
 
 const MINUTES_IN_HOUR = 60;
+const UNIT_TO_WORD = {
+  [TimeUnit.DAY]: "day",
+  [TimeUnit.WEEK]: "week",
+  [TimeUnit.MONTH]: "month",
+  [TimeUnit.YEAR]: "year",
+};
+const DAYS_OF_THE_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const MONTHS_OF_THE_YEAR = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sept",
+  "oct",
+  "nov",
+  "dec",
+];
 
 const formatCompletionTime = (time_minutes: number) => {
   const minutes_remainder = time_minutes % MINUTES_IN_HOUR;
@@ -32,13 +55,6 @@ const convertFrequencyToWords = (frequency: number): string => {
   } else {
     return `${frequency} times`;
   }
-};
-
-const UNIT_TO_WORD = {
-  [TimeUnit.DAY]: "day",
-  [TimeUnit.WEEK]: "week",
-  [TimeUnit.MONTH]: "month",
-  [TimeUnit.YEAR]: "year",
 };
 
 const convertEffortToWords = (item: Item): string | null => {
@@ -74,9 +90,11 @@ const convertRecurrenceToWords = (item: Item): string | null => {
 const convertUrgencyToWords = (item: Item): string | null => {
   if (item.time_spec?.urgency) {
     if (item.time_spec.urgency.hard_deadline) {
-      return `by ${item.time_spec.urgency.hard_deadline}`;
+      return `by ${formatDateToWordsRelative(
+        item.time_spec.urgency.hard_deadline
+      )}`;
     } else if (item.time_spec.urgency.expected_completion_date) {
-      return `by ~${item.time_spec.urgency.expected_completion_date}`;
+      return `by ${item.time_spec.urgency.expected_completion_date}`;
     } else {
       return null;
     }
@@ -85,19 +103,30 @@ const convertUrgencyToWords = (item: Item): string | null => {
   }
 };
 
-/**
- * once (don't show)
- * twice
- * 3 times
- * every month
- * twice a month
- * three times a week
- * three times every 2 weeks
- * twice by 2024-09-03
- * 2h30m every 2 weeks
- * 45m by 2024-09-05
- * 15m a week
- */
+const formatDateToWords = (dateIso: string) => {
+  const date = moment(dateIso);
+  const baseDate = `${MONTHS_OF_THE_YEAR[date.month()]} ${date.date()}`;
+  const yearSuffix = date.year() !== moment().year() ? `, ${date.year()}` : "";
+  return `${baseDate}${yearSuffix}`;
+};
+
+const formatDateToWordsRelative = (dateIso: string) => {
+  const todayIso = moment().format("YYYY-MM-DD");
+  const diffInDays = differenceInCalendarDays(dateIso, todayIso);
+  if (diffInDays === 0) {
+    return "today";
+  } else if (diffInDays > 13 || diffInDays < -7) {
+    const lateSuffix = diffInDays < -7 ? " (late)" : "";
+    return `${formatDateToWords(dateIso)}${lateSuffix}`;
+  } else if (diffInDays === 1) {
+    return "tomorrow";
+  } else if (diffInDays === -1) {
+    return "yesterday";
+  }
+  const prefix = diffInDays < -1 ? "last " : diffInDays > 6 ? "next " : "";
+  return `${prefix}${DAYS_OF_THE_WEEK[moment(dateIso).day()]}`;
+};
+
 export const summarizeTaskTimeSpec = (item: Item): string | null => {
   const effort = convertEffortToWords(item);
   const effort_filtered = effort === "once" ? null : effort;

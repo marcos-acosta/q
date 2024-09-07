@@ -12,3 +12,12 @@ export const joinNodes = (sections: ReactNode[], delimiter: ReactNode) => {
     </>
   );
 };
+
+export const callbackOnEnter = (
+  event: React.KeyboardEvent,
+  callbackFn: () => void
+) => {
+  if (event.key === "Enter") {
+    callbackFn();
+  }
+};
