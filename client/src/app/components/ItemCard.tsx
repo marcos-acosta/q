@@ -1,15 +1,9 @@
-import { EffortType, Item, Progress } from "@/interfaces/item";
+import { Item, Progress } from "@/interfaces/item";
 import styles from "./../css/ItemCard.module.css";
 import { useState } from "react";
-import { parseTimeDurationToMinutes } from "@/util/parsing";
 import { getItemCompletionStatus } from "@/util/progress";
-import {
-  capitalize,
-  formatTag,
-  summarizeTaskTimeSpec,
-} from "@/util/formatting";
-import ProgressCircle from "./ProgressCircle";
-import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
+import { capitalize, summarizeTaskTimeSpec } from "@/util/formatting";
+import { combineClasses, SOURCE_CODE_PRO, tagToColor } from "@/util/css";
 import { joinNodes } from "@/util/jsx-util";
 import CompletionButton from "./CompletionButton";
 
@@ -20,7 +14,6 @@ interface ItemCardProps {
 }
 
 export default function ItemCard(props: ItemCardProps) {
-  const [timeInput, setTimeInput] = useState("");
   const [isHovering, setIsHovering] = useState(false);
 
   const item = props.item;
@@ -48,7 +41,15 @@ export default function ItemCard(props: ItemCardProps) {
     <span>
       {item.tags.map((tag) => (
         <span key={tag} className={styles.tag}>
-          {formatTag(tag)}
+          #
+          {
+            <span
+              className={styles.tagBody}
+              style={{ textDecorationColor: tagToColor(tag) }}
+            >
+              {tag}
+            </span>
+          }
         </span>
       ))}
     </span>
@@ -83,7 +84,14 @@ export default function ItemCard(props: ItemCardProps) {
           />
         </div>
         <div className={styles.itemNameAndActionsContainer}>
-          <div className={styles.itemName}>{capitalize(item.name)}</div>
+          <div
+            className={combineClasses(
+              styles.itemName,
+              completionStatus.is_completed && styles.completedName
+            )}
+          >
+            {capitalize(item.name)}
+          </div>
           {isHovering && (
             <div className={styles.actions}>
               {joinNodes(actionButtons, " ")}

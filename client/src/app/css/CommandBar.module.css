@@ -5,6 +5,7 @@
   padding-left: 30px;
   padding-right: 30px;
   text-align: center;
+  box-shadow: -2px 2px 0px var(--theme-black);
 }
 
 .itemInputContainer {
@@ -28,4 +29,18 @@
 
 .whiteIcon {
   color: white;
+}
+
+.commandBarModeIndicator {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+span.indicator {
+  font-size: 36px;
+  font-variation-settings: "OPSZ" 20;
 }

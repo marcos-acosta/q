@@ -1,6 +1,7 @@
 import { EffortType, Item, TimeUnit } from "@/interfaces/item";
 import { differenceInCalendarDays } from "date-fns";
 import moment from "moment";
+import { regex } from "regex";
 
 const MINUTES_IN_HOUR = 60;
 const UNIT_TO_WORD = {
@@ -133,8 +134,14 @@ export const summarizeTaskTimeSpec = (item: Item): string | null => {
   const effort = convertEffortToWords(item);
   const effort_filtered = effort === "once" ? null : effort;
   const recurrence = convertRecurrenceToWords(item);
+  const recurrence_adjusted =
+    !effort_filtered && recurrence
+      ? recurrence.replace(regex`^a\s`, "every ")
+      : recurrence;
   const urgency = convertUrgencyToWords(item);
-  const inOrder = [effort_filtered, recurrence, urgency].filter(Boolean);
+  const inOrder = [effort_filtered, recurrence_adjusted, urgency].filter(
+    Boolean
+  );
   return inOrder.join(" ");
 };
 

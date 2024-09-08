@@ -28,8 +28,14 @@
   font-weight: bold;
 }
 
+.itemName.completedName {
+  text-decoration: line-through;
+  text-decoration-thickness: 3px;
+  color: var(--theme-gray);
+}
+
 .actions {
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 .info {
@@ -47,6 +53,11 @@
 
 .tag {
   padding-right: 10px;
+}
+
+.tagBody {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
 }
 
 .actionButton {
