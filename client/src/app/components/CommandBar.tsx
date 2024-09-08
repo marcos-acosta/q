@@ -3,7 +3,7 @@
 import { Item } from "@/interfaces/item";
 import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
 import { parseItemInput } from "@/util/item-input";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import styles from "@/app/css/CommandBar.module.css";
 import { callbackOnEnter } from "@/util/jsx-util";
 import { parseInputToQuery } from "@/util/query-input";
@@ -13,6 +13,7 @@ export interface CommandBarProps {
   addItem: (i: Item) => void;
   setQuery: (q: Query, qs: string) => void;
   querySpecInEffect: string;
+  addNamedQuery: (qn: string) => void;
 }
 
 const enum CommandBarMode {
@@ -77,6 +78,20 @@ export default function CommandBar(props: CommandBarProps) {
         size={Math.max(inputSpec.length, 20)}
         onKeyDown={(e) => callbackOnEnter(e, handleEnter)}
       />
+      <div className={styles.commandBarActions}>
+        {commandBarMode === CommandBarMode.QUERY &&
+          props.querySpecInEffect.length > 0 && (
+            <span
+              className={combineClasses(
+                "material-symbols-outlined",
+                styles.saveQuery
+              )}
+              onClick={() => props.addNamedQuery("unnamed query")}
+            >
+              bookmark_add
+            </span>
+          )}
+      </div>
     </div>
   );
 }

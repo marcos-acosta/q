@@ -8,18 +8,29 @@ import { addItemToDb, fetchItems, updateItemInDb } from "./server/items";
 import { updateItemWithProgress } from "@/util/progress";
 import { DEFAULT_QUERY, filterItemsByQuery } from "@/util/filtering";
 import { basicSortItems } from "@/util/sorting";
-import { Query } from "@/interfaces/query";
+import { NamedQuery, Query } from "@/interfaces/query";
+import { addNamedQueryToDb, fetchNamedQueries } from "./server/queries";
+import { v4 as uuid_v4 } from "uuid";
 
 export default function Q() {
   const [items, setItems] = useState([] as Item[]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [querySpecInEffect, setQuerySpecInEffect] = useState("");
+  const [namedQueries, setNamedQueries] = useState([] as NamedQuery[]);
+  const [isLoadingQueries, setIsLoadingQueries] = useState(true);
 
   useEffect(() => {
     fetchItems().then((data) => {
       setItems(data);
-      setIsLoading(false);
+      setIsLoadingItems(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchNamedQueries().then((data) => {
+      setNamedQueries(data);
+      setIsLoadingQueries(false);
     });
   }, []);
 
@@ -27,6 +38,21 @@ export default function Q() {
     try {
       addItemToDb(item).then((response) => console.log(response));
       setItems([...items, item]);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const addNamedQuery = (queryName: string) => {
+    const namedQuery: NamedQuery = {
+      query: query,
+      query_name: queryName,
+      id: uuid_v4(),
+      creation_timestamp: Date.now(),
+    };
+    try {
+      addNamedQueryToDb(namedQuery).then((response) => console.log(response));
+      setNamedQueries([...namedQueries, namedQuery]);
     } catch (e) {
       console.log(e);
     }
@@ -65,10 +91,11 @@ export default function Q() {
         addItem={addItem}
         setQuery={setQueryAndSpec}
         querySpecInEffect={querySpecInEffect}
+        addNamedQuery={addNamedQuery}
       />
       <ItemList
         items={filteredItems}
-        isLoading={isLoading}
+        isLoading={isLoadingItems}
         addProgress={addProgress}
         archive={archive}
       />

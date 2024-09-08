@@ -42,5 +42,17 @@
 
 span.indicator {
   font-size: 36px;
-  font-variation-settings: "OPSZ" 20;
+}
+
+.commandBarActions {
+  width: 40px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+span.saveQuery {
+  font-size: 36px;
 }

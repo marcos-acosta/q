@@ -60,6 +60,42 @@ app.post("/items/:id", async (req, res) => {
   }
 });
 
+app.get("/queries", async (req, res) => {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const queries = client.db("q").collection("queries");
+    res.send(await queries.find({}).toArray());
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+});
+
+app.post("/queries", async (req, res) => {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const queries = client.db("q").collection("queries");
+    res.send(await queries.insertOne(req.body));
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+});
+
+app.post("/queries/:id", async (req, res) => {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const queries = client.db("q").collection("queries");
+    res.send(await queries.replaceOne({ id: req.params.id }, req.body));
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server is up.");
 });
