@@ -1,4 +1,4 @@
-import { createRef, useState } from "react";
+import { createRef, ReactElement, useState } from "react";
 import ProgressCircle from "./ProgressCircle";
 import styles from "@/app/css/CompletionButton.module.css";
 import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
@@ -7,11 +7,11 @@ import { callbackOnEnter } from "@/util/jsx-util";
 import { parseTimeDurationToMinutes } from "@/util/parsing";
 
 export interface CompletionButtonProps {
-  completed: number;
-  total: number;
-  effortType: EffortType;
-  addCompletionTimes: () => void;
-  addCompletionDuration: (d: number) => void;
+  isInputType: boolean;
+  clickCallback: () => void;
+  inputCallback: (d: any) => void;
+  children: ReactElement;
+  classNames?: string;
 }
 
 const CLOSED_INPUT_WIDTH = "0px";
@@ -23,22 +23,22 @@ export default function CompletionButton(props: CompletionButtonProps) {
   const inputRef = createRef<HTMLInputElement>();
 
   const handleClick = () => {
-    if (props.effortType === EffortType.COMPLETION) {
-      props.addCompletionTimes();
-    } else {
+    if (props.isInputType) {
       setDurationInput("");
       if (hideInput) {
         openInput();
       } else {
         closeInput();
       }
+    } else {
+      props.clickCallback();
     }
   };
 
   const handleDurationInput = () => {
     try {
       const duration = parseTimeDurationToMinutes(durationInput);
-      props.addCompletionDuration(duration);
+      props.inputCallback(duration);
       setHideInput(true);
     } catch (e) {
       console.log(e);
@@ -60,7 +60,10 @@ export default function CompletionButton(props: CompletionButtonProps) {
   };
 
   return (
-    <div className={styles.completionContainer}>
+    <div
+      className={combineClasses(styles.completionContainer, props.classNames)}
+      onClick={handleClick}
+    >
       <input
         value={durationInput}
         onChange={(e) => setDurationInput(e.target.value)}
@@ -68,6 +71,9 @@ export default function CompletionButton(props: CompletionButtonProps) {
           styles.durationInput,
           SOURCE_CODE_PRO.className
         )}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
         onKeyDown={(e) => callbackOnEnter(e, handleDurationInput)}
         style={{
           width: hideInput ? CLOSED_INPUT_WIDTH : OPEN_INPUT_WIDTH,
@@ -76,11 +82,7 @@ export default function CompletionButton(props: CompletionButtonProps) {
         }}
         ref={inputRef}
       />
-      <ProgressCircle
-        completed={props.completed}
-        total={props.total}
-        onClick={handleClick}
-      />
+      {props.children}
     </div>
   );
 }

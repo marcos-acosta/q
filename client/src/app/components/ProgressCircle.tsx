@@ -4,7 +4,7 @@ import styles from "./../css/ProgressCircle.module.css";
 export interface ProgressCircleProps {
   completed: number;
   total: number;
-  onClick: () => void;
+  onClick?: () => void;
   styles?: Object;
 }
 

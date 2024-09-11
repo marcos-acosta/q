@@ -1,4 +1,4 @@
-import { Item, Progress } from "@/interfaces/item";
+import { EffortType, Item, Progress } from "@/interfaces/item";
 import styles from "./../css/ItemCard.module.css";
 import { useState } from "react";
 import { getItemCompletionStatus } from "@/util/progress";
@@ -6,6 +6,7 @@ import { capitalize, summarizeTaskTimeSpec } from "@/util/formatting";
 import { combineClasses, SOURCE_CODE_PRO, tagToColor } from "@/util/css";
 import { joinNodes } from "@/util/jsx-util";
 import CompletionButton from "./CompletionButton";
+import ProgressCircle from "./ProgressCircle";
 
 interface ItemCardProps {
   item: Item;
@@ -76,12 +77,15 @@ export default function ItemCard(props: ItemCardProps) {
       <div className={styles.itemCardContainer}>
         <div className={styles.completeBox}>
           <CompletionButton
-            completed={completionStatus.progress}
-            total={completionStatus.quota || 1}
-            effortType={item.effort_type}
-            addCompletionTimes={addOneTimeProgress}
-            addCompletionDuration={addDurationProgress}
-          />
+            isInputType={item.effort_type === EffortType.DURATION}
+            clickCallback={addOneTimeProgress}
+            inputCallback={addDurationProgress}
+          >
+            <ProgressCircle
+              completed={completionStatus.progress}
+              total={completionStatus.quota || 1}
+            />
+          </CompletionButton>
         </div>
         <div className={styles.itemNameAndActionsContainer}>
           <div

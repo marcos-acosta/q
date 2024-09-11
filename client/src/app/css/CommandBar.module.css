@@ -13,7 +13,7 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  margin-top: 30px;
+  padding-top: 30px;
 }
 
 .addItemButton {
@@ -42,6 +42,7 @@
 
 span.indicator {
   font-size: 36px;
+  color: var(--theme-black);
 }
 
 .commandBarActions {
@@ -49,10 +50,10 @@ span.indicator {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  margin-left: 10px;
   cursor: pointer;
 }
 
 span.saveQuery {
   font-size: 36px;
+  color: var(--theme-black);
 }
