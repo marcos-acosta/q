@@ -51,6 +51,7 @@ export type Query = z.infer<typeof QuerySchema>;
 export const NamedQuerySchema = z.object({
   query: QuerySchema,
   query_name: z.string(),
+  creation_spec: z.string(),
   id: z.string(),
   creation_timestamp: z.number(),
 });
