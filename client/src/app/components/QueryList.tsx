@@ -1,5 +1,6 @@
 import { NamedQuery } from "@/interfaces/query";
 import QueryCard from "./QueryCard";
+import style from "@/app/css/QueryList.module.css";
 
 export interface QueryListProps {
   namedQueries: NamedQuery[];
@@ -30,5 +31,5 @@ export default function QueryList(props: QueryListProps) {
     )),
   ];
 
-  return <div>{queryTabs}</div>;
+  return <div className={style.queryListContainer}>{queryTabs}</div>;
 }

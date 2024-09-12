@@ -1,8 +1,8 @@
 .itemCardContainer {
-  margin-bottom: 20px;
   display: inline-grid;
   grid-template-columns: auto auto auto;
-  grid-template-rows: 50px 50px;
+  grid-template-rows: 40px 40px;
+  margin-bottom: 10px;
 }
 
 .completeBox {
@@ -24,7 +24,7 @@
 }
 
 .itemName {
-  font-size: 24pt;
+  font-size: 28px;
   font-weight: bold;
 }
 
@@ -44,6 +44,7 @@
   max-width: 1000px;
   font-style: italic;
   color: var(--theme-gray);
+  font-size: 20px;
 }
 
 .bulletPoint {

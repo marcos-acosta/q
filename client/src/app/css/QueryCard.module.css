@@ -1,0 +1,20 @@
+.queryCardContainer {
+  display: flex;
+  flex-direction: column;
+  padding-left: 30px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: inline-block;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.selected {
+  font-weight: bold;
+}
+
+.queryCardSpec {
+  margin-top: 5px;
+  color: var(--theme-gray);
+  font-size: 15pt;
+}

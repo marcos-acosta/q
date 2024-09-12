@@ -1,3 +1,6 @@
+import style from "@/app/css/QueryCard.module.css";
+import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
+
 interface QueryCardProps {
   queryName: string;
   querySpec: string;
@@ -7,15 +10,23 @@ interface QueryCardProps {
 
 export default function QueryCard(props: QueryCardProps) {
   return (
-    <div
-      style={{
-        border: "1px solid black",
-        backgroundColor: props.isSelected ? "yellow" : "white",
-      }}
-      onClick={props.selectCallback}
-    >
-      <div>{props.queryName}</div>
-      <div>{props.querySpec}</div>
+    <div className={style.queryCardContainer} onClick={props.selectCallback}>
+      <div
+        className={combineClasses(
+          style.queryCardName,
+          props.isSelected && style.selected
+        )}
+      >
+        {props.queryName}
+      </div>
+      <div
+        className={combineClasses(
+          style.queryCardSpec,
+          SOURCE_CODE_PRO.className
+        )}
+      >
+        {props.querySpec}
+      </div>
     </div>
   );
 }

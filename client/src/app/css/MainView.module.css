@@ -1,6 +1,6 @@
 .mainGrid {
   display: grid;
-  grid-template-columns: 0.3fr 0.7fr;
+  grid-template-columns: 0.25fr 0.75fr;
   grid-template-rows: 1fr;
   position: absolute;
   top: 0;
@@ -8,4 +8,8 @@
   width: 100vw;
   height: 100vh;
   overflow-y: scroll;
+}
+
+.leftBar {
+  border-right: 1px solid var(--theme-black);
 }

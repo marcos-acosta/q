@@ -3,7 +3,7 @@
 import { Item } from "@/interfaces/item";
 import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
 import { parseItemInput } from "@/util/item-input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "@/app/css/CommandBar.module.css";
 import { callbackOnEnter } from "@/util/jsx-util";
 import { parseInputToQuery } from "@/util/query-input";
@@ -26,6 +26,12 @@ export default function CommandBar(props: CommandBarProps) {
   const [inputSpec, setInputSpec] = useState("");
   const [commandBarMode, setCommandBarMode] = useState(CommandBarMode.ADD);
   const [isSavingQuery, setIsSavingQuery] = useState(false);
+
+  useEffect(() => {
+    if (commandBarMode === CommandBarMode.QUERY) {
+      setInputSpec(props.querySpecInEffect);
+    }
+  }, [props.querySpecInEffect, commandBarMode]);
 
   const handleEnter = () => {
     if (commandBarMode === CommandBarMode.ADD) {

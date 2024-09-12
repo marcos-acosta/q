@@ -51,6 +51,7 @@ export default function MainView(props: MainViewProps) {
     try {
       addNamedQueryToDb(namedQuery).then((response) => console.log(response));
       props.setQueries([...props.queries, namedQuery]);
+      selectQuery(namedQuery);
     } catch (e) {
       console.log(e);
     }
@@ -100,7 +101,7 @@ export default function MainView(props: MainViewProps) {
 
   return (
     <div className={style.mainGrid}>
-      <div>
+      <div className={style.leftBar}>
         <QueryList
           namedQueries={props.queries}
           selectedQueryId={selectedQueryId}

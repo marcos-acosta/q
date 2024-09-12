@@ -11,9 +11,9 @@
 .itemInputContainer {
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
   padding-top: 30px;
+  padding-left: calc(20% - 74px);
 }
 
 .addItemButton {
@@ -21,7 +21,6 @@
   height: 44px;
   width: 44px;
   border-radius: 22px;
-  margin-left: 10px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
