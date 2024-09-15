@@ -12,6 +12,7 @@ interface ItemCardProps {
   item: Item;
   addProgress: (p: Progress, i: Item) => void;
   archive: () => void;
+  delete: () => void;
 }
 
 export default function ItemCard(props: ItemCardProps) {
@@ -66,6 +67,9 @@ export default function ItemCard(props: ItemCardProps) {
     </button>,
     <button onClick={() => {}} className={styles.actionButton}>
       <span className="material-symbols-outlined">edit</span>
+    </button>,
+    <button onClick={props.delete} className={styles.actionButton}>
+      <span className="material-symbols-outlined">delete</span>
     </button>,
   ];
 

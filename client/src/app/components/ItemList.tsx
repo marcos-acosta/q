@@ -10,6 +10,7 @@ export interface ItemListProps {
   isLoading: boolean;
   addProgress: (p: Progress, i: Item) => void;
   archive: (i: Item) => void;
+  delete: (i: Item) => void;
 }
 
 export default function ItemList(props: ItemListProps) {
@@ -27,6 +28,7 @@ export default function ItemList(props: ItemListProps) {
                 item={item}
                 addProgress={props.addProgress}
                 archive={() => props.archive(item)}
+                delete={() => props.delete(item)}
               />
             </div>
           ))}

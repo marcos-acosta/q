@@ -22,3 +22,9 @@ export async function updateItemInDb(item: Item) {
     .post(`http://localhost:3000/items/${item.id}`, item)
     .then((response) => response.data);
 }
+
+export async function deleteItemInDb(item: Item) {
+  return await axios
+    .delete(`http://localhost:3000/items/${item.id}`)
+    .then((response) => response.data);
+}

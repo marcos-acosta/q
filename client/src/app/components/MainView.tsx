@@ -4,7 +4,11 @@ import { useState } from "react";
 import CommandBar from "./CommandBar";
 import ItemList from "./ItemList";
 import { Item, Progress } from "@/interfaces/item";
-import { addItemToDb, updateItemInDb } from "@/app/server/items";
+import {
+  addItemToDb,
+  deleteItemInDb,
+  updateItemInDb,
+} from "@/app/server/items";
 import { updateItemWithProgress } from "@/util/progress";
 import { DEFAULT_QUERY, filterItemsByQuery } from "@/util/filtering";
 import { basicSortItems } from "@/util/sorting";
@@ -86,6 +90,15 @@ export default function MainView(props: MainViewProps) {
     }
   };
 
+  const deleteItem = (item: Item) => {
+    try {
+      deleteItemInDb(item).then((response) => console.log(response));
+      props.setItems(props.items.filter((_item) => _item.id !== item.id));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const filteredItems = basicSortItems(
     filterItemsByQuery(
       props.items,
@@ -120,6 +133,7 @@ export default function MainView(props: MainViewProps) {
           isLoading={props.isItemsLoading}
           addProgress={addProgress}
           archive={archive}
+          delete={deleteItem}
         />
       </div>
     </div>
