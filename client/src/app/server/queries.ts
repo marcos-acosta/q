@@ -22,3 +22,9 @@ export async function updateQueryInDb(named_query: NamedQuery) {
     .post(`http://localhost:3000/items/${named_query.id}`, named_query)
     .then((response) => response.data);
 }
+
+export async function deleteQueryInDb(named_query: NamedQuery) {
+  return await axios
+    .delete(`http://localhost:3000/queries/${named_query.id}`)
+    .then((response) => response.data);
+}

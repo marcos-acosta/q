@@ -13,7 +13,7 @@ import { updateItemWithProgress } from "@/util/progress";
 import { DEFAULT_QUERY, filterItemsByQuery } from "@/util/filtering";
 import { basicSortItems } from "@/util/sorting";
 import { NamedQuery, Query } from "@/interfaces/query";
-import { addNamedQueryToDb } from "@/app/server/queries";
+import { addNamedQueryToDb, deleteQueryInDb } from "@/app/server/queries";
 import { v4 as uuid_v4 } from "uuid";
 import style from "@/app/css/MainView.module.css";
 import QueryList from "./QueryList";
@@ -112,6 +112,15 @@ export default function MainView(props: MainViewProps) {
     setSelectedQueryId(namedQuery ? namedQuery.id : null);
   };
 
+  const deleteQuery = (nq: NamedQuery) => {
+    try {
+      deleteQueryInDb(nq).then((response) => console.log(response));
+      props.setQueries(props.queries.filter((_nq) => _nq.id !== nq.id));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <div className={style.mainGrid}>
       <div className={style.leftBar}>
@@ -119,6 +128,7 @@ export default function MainView(props: MainViewProps) {
           namedQueries={props.queries}
           selectedQueryId={selectedQueryId}
           selectQuery={selectQuery}
+          deleteQuery={deleteQuery}
         />
       </div>
       <div>

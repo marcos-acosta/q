@@ -59,6 +59,7 @@
 .tagBody {
   text-decoration: underline;
   text-decoration-thickness: 3px;
+  text-decoration-color: var(--theme-black);
 }
 
 .actionButton {

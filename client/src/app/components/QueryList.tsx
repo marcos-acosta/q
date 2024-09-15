@@ -6,6 +6,7 @@ export interface QueryListProps {
   namedQueries: NamedQuery[];
   selectedQueryId: string | null;
   selectQuery: (nq: NamedQuery | null) => void;
+  deleteQuery: (nq: NamedQuery) => void;
 }
 
 export default function QueryList(props: QueryListProps) {
@@ -16,6 +17,7 @@ export default function QueryList(props: QueryListProps) {
       isSelected={props.selectedQueryId === null}
       selectCallback={() => props.selectQuery(null)}
       key="heap"
+      isDefault={true}
     />
   );
   const queryTabs = [
@@ -26,6 +28,7 @@ export default function QueryList(props: QueryListProps) {
         querySpec={namedQuery.creation_spec}
         isSelected={namedQuery.id === props.selectedQueryId}
         selectCallback={() => props.selectQuery(namedQuery)}
+        delete={() => props.deleteQuery(namedQuery)}
         key={namedQuery.id}
       />
     )),

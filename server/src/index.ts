@@ -108,6 +108,18 @@ app.post("/queries/:id", async (req, res) => {
   }
 });
 
+app.delete("/queries/:id", async (req, res) => {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const items = client.db("q").collection("queries");
+    res.send(await items.deleteOne({ id: req.params.id }));
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server is up.");
 });

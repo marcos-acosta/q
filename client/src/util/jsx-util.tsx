@@ -21,3 +21,13 @@ export const callbackOnEnter = (
     callbackFn();
   }
 };
+
+export const andStopPropagate = (
+  event: React.MouseEvent,
+  callbackFn?: () => void
+) => {
+  event.stopPropagation();
+  if (callbackFn) {
+    callbackFn();
+  }
+};
