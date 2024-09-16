@@ -10,6 +10,11 @@
   overflow-y: scroll;
 }
 
-.leftBar {
+.queryBar {
+  position: fixed;
+  top: 0;
+  left: 0;
   border-right: 1px solid var(--theme-black);
+  width: 15%;
+  height: 100vh;
 }

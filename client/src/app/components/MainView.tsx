@@ -133,8 +133,8 @@ export default function MainView(props: MainViewProps) {
   return props.isOffline ? (
     <div>you're offline</div>
   ) : (
-    <div className={style.mainGrid}>
-      <div className={style.leftBar}>
+    <div>
+      <div className={style.queryBar}>
         <QueryList
           namedQueries={props.queries}
           selectedQueryId={selectedQueryId}
