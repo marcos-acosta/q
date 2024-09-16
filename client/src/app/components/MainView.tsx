@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommandBar from "./CommandBar";
 import ItemList from "./ItemList";
 import { Item, Progress } from "@/interfaces/item";
@@ -25,12 +25,21 @@ export interface MainViewProps {
   queries: NamedQuery[];
   isQueriesLoading: boolean;
   setQueries: (q: NamedQuery[]) => void;
+  isOffline: boolean;
 }
 
 export default function MainView(props: MainViewProps) {
   const [querySpecInEffect, setQuerySpecInEffect] = useState("");
   const [queryInEffect, setQueryInEffect] = useState(null as Query | null);
   const [selectedQueryId, setSelectedQueryId] = useState(null as string | null);
+  const setNow = useState(Date.now())[1];
+
+  useEffect(() => {
+    const updateNow = () => setNow(Date.now());
+    // Update every 5 minutes
+    const intervalId = setInterval(updateNow, 1000 * 60 * 5);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const addItem = (item: Item) => {
     try {
@@ -121,7 +130,9 @@ export default function MainView(props: MainViewProps) {
     }
   };
 
-  return (
+  return props.isOffline ? (
+    <div>you're offline</div>
+  ) : (
     <div className={style.mainGrid}>
       <div className={style.leftBar}>
         <QueryList

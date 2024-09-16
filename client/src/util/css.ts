@@ -7,11 +7,11 @@ export const THEME_COLORS = {
 };
 
 export const TAG_COLORS = {
-  CRIMSON: "#A4243B",
-  ECRU: "#D8C99B",
-  BUTTERSCOTCH: "#D8973C",
-  ORANGE: "#BD632F",
-  CHARCOAL: "#273E47",
+  GREEN: "#44AF69",
+  RED: "#F8333C",
+  YELLOW: "#FCAB10",
+  BLUE: "#2B9EB3",
+  PURPLE: "#B0A1BA",
 };
 
 export const MANROPE = Manrope({ weight: "500", subsets: ["latin"] });
@@ -22,16 +22,14 @@ export const SOURCE_CODE_PRO = Source_Code_Pro({
 });
 
 const hashString = (s: string): number => {
-  let hash = 0,
-    i,
-    chr;
-  if (s.length === 0) return hash;
-  for (i = 0; i < s.length; i++) {
-    chr = s.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
+  if (!s.length) {
+    return 0;
   }
-  return hash;
+  const firstChar = s.charCodeAt(0);
+  if (s.length === 1) {
+    return firstChar;
+  }
+  return firstChar + s.charCodeAt(1) - s.length;
 };
 
 export const combineClasses = (...classNames: MaybeString[]) =>

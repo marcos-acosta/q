@@ -12,19 +12,28 @@ export default function Q() {
   const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [namedQueries, setNamedQueries] = useState([] as NamedQuery[]);
   const [isLoadingQueries, setIsLoadingQueries] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     fetchItems().then((data) => {
       setItems(data);
       setIsLoadingItems(false);
     });
-  }, []);
-
-  useEffect(() => {
     fetchNamedQueries().then((data) => {
       setNamedQueries(data);
       setIsLoadingQueries(false);
     });
+  }, []);
+
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+    addEventListener("offline", handleOffline);
+    addEventListener("online", handleOnline);
+    return () => {
+      removeEventListener("offline", handleOffline);
+      removeEventListener("online", handleOnline);
+    };
   }, []);
 
   return (
@@ -35,6 +44,7 @@ export default function Q() {
       queries={namedQueries}
       isQueriesLoading={isLoadingQueries}
       setQueries={setNamedQueries}
+      isOffline={isOffline}
     />
   );
 }
