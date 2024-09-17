@@ -1,24 +1,24 @@
 import { z } from "zod";
 
 export enum BooleanItemField {
-  RECURRING,
-  DURATION_BASED,
-  ARCHIVED,
-  COMPLETED,
+  RECURRING = "RECURRING",
+  DURATION_BASED = "DURATION_BASED",
+  ARCHIVED = "ARCHIVED",
+  COMPLETED = "COMPLETED",
 }
 
 export enum QuantifiableItemField {
-  DUE_DATE,
-  CREATION_DATE,
-  PRIORITY,
+  DUE_DATE = "DUE_DATE",
+  CREATION_DATE = "CREATION_DATE",
+  PRIORITY = "PRIORITY",
 }
 
 export enum Comparator {
-  LEQ,
-  LT,
-  EQ,
-  GT,
-  GTEQ,
+  LTEQ = "LTEQ",
+  LT = "LT",
+  EQ = "EQ",
+  GT = "GT",
+  GTEQ = "GTEQ",
 }
 
 const BooleanMatcherSchema = z.object({
@@ -27,7 +27,7 @@ const BooleanMatcherSchema = z.object({
 });
 export type BooleanMatcher = z.infer<typeof BooleanMatcherSchema>;
 
-const QuantifierMatcherSchema = z.object({
+export const QuantifierMatcherSchema = z.object({
   field: z.nativeEnum(QuantifiableItemField),
   comparison_value: z.union([z.string(), z.number()]),
   comparator: z.nativeEnum(Comparator),
