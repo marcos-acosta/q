@@ -1,8 +1,8 @@
 "use server";
 
-import { Item } from "@/interfaces/item";
-import { parseListAsItems } from "@/util/parsing";
+import { Item } from "@/app/interfaces/item";
 import axios from "axios";
+import { parseListAsItems } from "../core/data/validating";
 
 export async function fetchItems(): Promise<Item[]> {
   const item_results = await axios

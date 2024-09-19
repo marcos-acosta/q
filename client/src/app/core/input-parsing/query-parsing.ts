@@ -7,9 +7,9 @@ import {
   QuantifiableItemField,
   Comparator,
   QuantifierMatcherSchema,
-} from "@/interfaces/query";
+} from "@/app/interfaces/query";
 import { regex } from "regex";
-import { parseDateToIso } from "./parsing";
+import { parseStringToDate } from "./parsing-util";
 
 const KEYWORD_PATTERN = regex(
   "g"
@@ -72,8 +72,7 @@ const parseDueDate = (dueDateExpression: string): QuantifierMatcher | null => {
     quantifierMatcher.comparator = Comparator.EQ;
   }
   try {
-    const dateIso = parseDateToIso(remainingDueDate);
-    quantifierMatcher.comparison_value = dateIso;
+    quantifierMatcher.comparison_value = parseStringToDate(remainingDueDate);
     return QuantifierMatcherSchema.parse(quantifierMatcher);
   } catch (e) {
     return null;

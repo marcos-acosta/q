@@ -1,8 +1,8 @@
 "use server";
 
-import { NamedQuery } from "@/interfaces/query";
-import { parseListAsNamedQueries } from "@/util/parsing";
 import axios from "axios";
+import { NamedQuery } from "../interfaces/query";
+import { parseListAsNamedQueries } from "../core/data/validating";
 
 export async function fetchNamedQueries(): Promise<NamedQuery[]> {
   const item_results = await axios

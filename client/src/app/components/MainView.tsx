@@ -3,20 +3,23 @@
 import { useEffect, useState } from "react";
 import CommandBar from "./CommandBar";
 import ItemList from "./ItemList";
-import { Item, Progress } from "@/interfaces/item";
+import { Item, Progress } from "@/app/interfaces/item";
 import {
   addItemToDb,
   deleteItemInDb,
   updateItemInDb,
 } from "@/app/server/items";
-import { updateItemWithProgress } from "@/util/progress";
-import { DEFAULT_QUERY, filterItemsByQuery } from "@/util/filtering";
-import { basicSortItems } from "@/util/sorting";
-import { NamedQuery, Query } from "@/interfaces/query";
+import { updateItemWithProgress } from "@/app/core/data/progress";
+import {
+  DEFAULT_QUERY,
+  filterItemsByQuery,
+} from "@/app/core/queries/filtering";
+import { basicSortItems } from "@/app/core/sorting/sorting";
 import { addNamedQueryToDb, deleteQueryInDb } from "@/app/server/queries";
 import { v4 as uuid_v4 } from "uuid";
 import style from "@/app/css/MainView.module.css";
 import QueryList from "./QueryList";
+import { NamedQuery, Query } from "../interfaces/query";
 
 export interface MainViewProps {
   items: Item[];

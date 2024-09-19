@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { MANROPE } from "@/util/css";
+import { MANROPE } from "@/app/core/styling/css";
 
 export const metadata: Metadata = {
   title: "Q",

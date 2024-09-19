@@ -1,4 +1,4 @@
-import { THEME_COLORS } from "@/util/css";
+import { THEME_COLORS } from "@/app/core/styling/css";
 import styles from "./../css/ProgressCircle.module.css";
 
 export interface ProgressCircleProps {

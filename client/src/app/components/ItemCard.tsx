@@ -1,12 +1,17 @@
-import { EffortType, Item, Progress } from "@/interfaces/item";
+import { EffortType, Item, Progress } from "@/app/interfaces/item";
 import styles from "./../css/ItemCard.module.css";
 import { useState } from "react";
-import { getItemCompletionStatus } from "@/util/progress";
-import { capitalize, summarizeTaskTimeSpec } from "@/util/formatting";
-import { combineClasses, SOURCE_CODE_PRO, tagToColor } from "@/util/css";
-import { joinNodes } from "@/util/jsx-util";
+import { getItemCompletionStatus } from "@/app/core/data/progress";
+import {
+  capitalize,
+  combineClasses,
+  SOURCE_CODE_PRO,
+  tagToColor,
+} from "@/app/core/styling/css";
 import CompletionButton from "./CompletionButton";
 import ProgressCircle from "./ProgressCircle";
+import { joinNodes } from "@/app/core/styling/jsx-util";
+import { summarizeTaskTimeSpec } from "@/app/core/data-rendering/time-spec";
 
 interface ItemCardProps {
   item: Item;

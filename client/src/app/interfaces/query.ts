@@ -27,9 +27,12 @@ const BooleanMatcherSchema = z.object({
 });
 export type BooleanMatcher = z.infer<typeof BooleanMatcherSchema>;
 
+const comparableTypeSchema = z.union([z.string(), z.number(), z.date()]);
+export type QueryComparableType = z.infer<typeof comparableTypeSchema>;
+
 export const QuantifierMatcherSchema = z.object({
   field: z.nativeEnum(QuantifiableItemField),
-  comparison_value: z.union([z.string(), z.number()]),
+  comparison_value: comparableTypeSchema,
   comparator: z.nativeEnum(Comparator),
 });
 export type QuantifierMatcher = z.infer<typeof QuantifierMatcherSchema>;

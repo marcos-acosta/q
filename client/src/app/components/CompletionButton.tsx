@@ -1,10 +1,8 @@
 import { createRef, ReactElement, useState } from "react";
-import ProgressCircle from "./ProgressCircle";
 import styles from "@/app/css/CompletionButton.module.css";
-import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
-import { EffortType } from "@/interfaces/item";
-import { callbackOnEnter } from "@/util/jsx-util";
-import { parseTimeDurationToMinutes } from "@/util/parsing";
+import { combineClasses, SOURCE_CODE_PRO } from "@/app/core/styling/css";
+import { callbackOnEnter } from "@/app/core/styling/jsx-util";
+import { parseTimeDurationToMinutes } from "../core/input-parsing/parsing-util";
 
 export interface CompletionButtonProps {
   isInputType: boolean;

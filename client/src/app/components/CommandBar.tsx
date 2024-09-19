@@ -1,14 +1,14 @@
 "use client";
 
-import { Item } from "@/interfaces/item";
-import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
-import { parseItemInput } from "@/util/item-input";
+import { Item } from "@/app/interfaces/item";
+import { combineClasses, SOURCE_CODE_PRO } from "@/app/core/styling/css";
 import { useEffect, useState } from "react";
 import styles from "@/app/css/CommandBar.module.css";
-import { callbackOnEnter } from "@/util/jsx-util";
-import { parseInputToQuery } from "@/util/query-input";
-import { Query } from "@/interfaces/query";
+import { callbackOnEnter } from "@/app/core/styling/jsx-util";
+import { parseInputToQuery } from "@/app/core/input-parsing/query-parsing";
 import FullScreenInput from "./FullScreenInput";
+import { parseItemInput } from "@/app/core/input-parsing/item-parsing";
+import { Query } from "../interfaces/query";
 
 export interface CommandBarProps {
   addItem: (i: Item) => void;

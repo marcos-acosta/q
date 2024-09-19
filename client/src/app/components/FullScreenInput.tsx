@@ -1,6 +1,6 @@
 import styles from "@/app/css/FullScreenInput.module.css";
-import { combineClasses, SOURCE_CODE_PRO } from "@/util/css";
-import { callbackOnEnter } from "@/util/jsx-util";
+import { combineClasses, SOURCE_CODE_PRO } from "@/app/core/styling/css";
+import { callbackOnEnter } from "@/app/core/styling/jsx-util";
 import { MouseEvent, useState } from "react";
 
 export interface FullScreenInputProps {

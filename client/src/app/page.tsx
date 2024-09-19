@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Item } from "@/interfaces/item";
+import { Item } from "@/app/interfaces/item";
 import { fetchItems } from "./server/items";
-import { NamedQuery } from "@/interfaces/query";
 import { fetchNamedQueries } from "./server/queries";
 import MainView from "./components/MainView";
+import { NamedQuery } from "./interfaces/query";
 
 export default function Q() {
   const [items, setItems] = useState([] as Item[]);

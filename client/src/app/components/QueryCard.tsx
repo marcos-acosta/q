@@ -1,6 +1,10 @@
 import styles from "@/app/css/QueryCard.module.css";
-import { combineClasses, SOURCE_CODE_PRO, tagToColor } from "@/util/css";
-import { andStopPropagate, joinNodes } from "@/util/jsx-util";
+import {
+  combineClasses,
+  SOURCE_CODE_PRO,
+  tagToColor,
+} from "@/app/core/styling/css";
+import { andStopPropagate, joinNodes } from "@/app/core/styling/jsx-util";
 import { useState } from "react";
 
 interface QueryCardProps {

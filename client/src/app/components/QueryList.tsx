@@ -1,4 +1,4 @@
-import { NamedQuery } from "@/interfaces/query";
+import { NamedQuery } from "../interfaces/query";
 import QueryCard from "./QueryCard";
 import style from "@/app/css/QueryList.module.css";
 

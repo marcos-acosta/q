@@ -23,13 +23,13 @@ export enum EffortType {
 const RecurrenceSchema = z.object({
   inverse_frequency: z.number(),
   unit: z.nativeEnum(TimeUnit),
-  start_date: z.string().date(),
+  start_date: z.coerce.date(),
 });
 export type Recurrence = z.infer<typeof RecurrenceSchema>;
 
 const UrgencySchema = z.object({
-  expected_completion_date: z.optional(z.string().date()),
-  hard_deadline: z.optional(z.string().date()),
+  expected_completion_date: z.optional(z.coerce.date()),
+  hard_deadline: z.optional(z.coerce.date()),
 });
 export type Urgency = z.infer<typeof UrgencySchema>;
 
@@ -50,8 +50,8 @@ const LogSchema = z.object({
 export type Log = z.infer<typeof LogSchema>;
 
 const DateRangeSchema = z.object({
-  start_date_inclusive: z.string().date(),
-  end_date_exclusive: z.string().date(),
+  start_date_inclusive: z.coerce.date(),
+  end_date_exclusive: z.coerce.date(),
 });
 export type DateRange = z.infer<typeof DateRangeSchema>;
 

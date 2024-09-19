@@ -1,24 +1,27 @@
+import { EffortType, Item, Progress } from "@/app/interfaces/item";
 import {
-  DateRange,
-  EffortType,
-  Item,
-  Progress,
-  TimeUnit,
-} from "@/interfaces/item";
-import { isRecurring } from "./item-util";
-import { dateRangesEqual, getPeriodFromDate } from "./dates";
+  dateRangesEqual,
+  findPeriodForDateGivenRecurrence,
+} from "../dates/date-util";
 
 export const getCompletionForDate = (item: Item, date: Date) => {
   const recurrence = item.time_spec?.recurrence;
-  let progress_filter = (p: Progress) => true;
+  let progress_filter = (p: Progress) => false;
   if (recurrence) {
-    const recurrence_cadence: TimeUnit = recurrence.unit;
-    const range: DateRange = getPeriodFromDate(date, recurrence_cadence);
-    progress_filter = (p: Progress) =>
-      dateRangesEqual(
-        getPeriodFromDate(new Date(p.timestamp), recurrence_cadence),
-        range
-      );
+    const range = findPeriodForDateGivenRecurrence(date, recurrence);
+    if (range) {
+      progress_filter = (p: Progress) => {
+        const progress_time_period = findPeriodForDateGivenRecurrence(
+          new Date(p.timestamp),
+          recurrence
+        );
+        return Boolean(
+          progress_time_period && dateRangesEqual(progress_time_period, range)
+        );
+      };
+    }
+  } else {
+    progress_filter = (p: Progress) => true;
   }
   // If not recurring, the date doesn't matter.
   let times_total = 0;
@@ -63,7 +66,7 @@ export const updateItemWithProgress = (
     progress: [...item.progress, progress],
   };
   if (
-    !isRecurring(new_item) &&
+    new_item.time_spec?.recurrence &&
     getItemCompletionStatus(new_item, new Date()).is_completed
   ) {
     new_item.is_archived = true;

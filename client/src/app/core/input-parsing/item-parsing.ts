@@ -1,18 +1,22 @@
-import { EffortType, Item, ItemSchema, PriorityLevel } from "@/interfaces/item";
-import { regex } from "regex";
 import {
-  parseDateToIso,
-  parsePriority,
-  parseTimeDurationToMinutes,
-  parseTimeInterval,
-  TimeInterval,
-} from "./parsing";
+  EffortType,
+  Item,
+  ItemSchema,
+  PriorityLevel,
+} from "@/app/interfaces/item";
+import { regex } from "regex";
 import { v4 as uuidv4 } from "uuid";
 import {
   addIntervalToDate,
-  formatDateIso,
   getStartOfPreviousPeriod,
-} from "./dates";
+} from "../dates/date-util";
+import {
+  parsePriority,
+  parseStringToDate,
+  parseTimeDurationToMinutes,
+  parseTimeInterval,
+  TimeInterval,
+} from "./parsing-util";
 
 const regex_no_x = regex({
   disable: { x: true },
@@ -75,7 +79,7 @@ const constructPartialItemFromResults = (
   const expected_completion_date =
     urgency &&
     addIntervalToDate(
-      formatDateIso(getStartOfPreviousPeriod(new Date(), urgency.unit)),
+      getStartOfPreviousPeriod(new Date(), urgency.unit),
       urgency
     );
   const urgency_exists = expected_completion_date || hard_deadline;
@@ -94,9 +98,7 @@ const constructPartialItemFromResults = (
         ? {
             inverse_frequency: recurrence.quantity,
             unit: recurrence.unit,
-            start_date: formatDateIso(
-              getStartOfPreviousPeriod(new Date(), recurrence.unit)
-            ),
+            start_date: getStartOfPreviousPeriod(new Date(), recurrence.unit),
           }
         : undefined,
       urgency: urgency_exists
@@ -132,7 +134,7 @@ export const parseItemInput = (item_spec: string): Item => {
     [URGENCY_PATTERN, parseTimeInterval, "urgency"],
     [TIMES_PATTERN, parseInt, "times"],
     [PRIORITY_PATTERN, parsePriority, "priority"],
-    [HARD_DEADLINE_PATTERN, parseDateToIso, "hard_deadline"],
+    [HARD_DEADLINE_PATTERN, parseStringToDate, "hard_deadline"],
     [DURATION_BASED_FLAG, undefined, "is_duration_based"],
     [GOAL_FLAG, undefined, "is_goal"],
   ];

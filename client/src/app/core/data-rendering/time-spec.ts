@@ -1,6 +1,5 @@
-import { EffortType, Item, TimeUnit } from "@/interfaces/item";
+import { EffortType, Item, TimeUnit } from "@/app/interfaces/item";
 import { differenceInCalendarDays } from "date-fns";
-import moment from "moment";
 import { regex } from "regex";
 
 const MINUTES_IN_HOUR = 60;
@@ -37,14 +36,6 @@ const formatCompletionTime = (time_minutes: number) => {
     }
   } else {
     return `${minutes_remainder}m`;
-  }
-};
-
-export const capitalize = (text: string) => {
-  if (text.length === 0) {
-    return "";
-  } else {
-    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 };
 
@@ -106,28 +97,28 @@ const convertUrgencyToWords = (item: Item): string | null => {
   }
 };
 
-const formatDateToWords = (dateIso: string) => {
-  const date = moment(dateIso);
-  const baseDate = `${MONTHS_OF_THE_YEAR[date.month()]} ${date.date()}`;
-  const yearSuffix = date.year() !== moment().year() ? `, ${date.year()}` : "";
+const formatDateToWords = (date: Date) => {
+  const today = new Date();
+  const baseDate = `${MONTHS_OF_THE_YEAR[date.getMonth()]} ${date.getDate()}`;
+  const yearSuffix =
+    date.getFullYear() !== today.getFullYear() ? `, ${date.getFullYear()}` : "";
   return `${baseDate}${yearSuffix}`;
 };
 
-const formatDateToWordsRelative = (dateIso: string) => {
-  const todayIso = moment().format("YYYY-MM-DD");
-  const diffInDays = differenceInCalendarDays(dateIso, todayIso);
+const formatDateToWordsRelative = (date: Date) => {
+  const diffInDays = differenceInCalendarDays(date, new Date());
   if (diffInDays === 0) {
     return "today";
   } else if (diffInDays > 13 || diffInDays < -7) {
     const lateSuffix = diffInDays < -7 ? " (late)" : "";
-    return `${formatDateToWords(dateIso)}${lateSuffix}`;
+    return `${formatDateToWords(date)}${lateSuffix}`;
   } else if (diffInDays === 1) {
     return "tomorrow";
   } else if (diffInDays === -1) {
     return "yesterday";
   }
   const prefix = diffInDays < -1 ? "last " : diffInDays > 6 ? "next " : "";
-  return `${prefix}${DAYS_OF_THE_WEEK[moment(dateIso).day()]}`;
+  return `${prefix}${DAYS_OF_THE_WEEK[date.getDay()]}`;
 };
 
 export const summarizeTaskTimeSpec = (item: Item): string | null => {
@@ -144,5 +135,3 @@ export const summarizeTaskTimeSpec = (item: Item): string | null => {
   );
   return inOrder.join(" ");
 };
-
-export const formatTag = (tag: string): string => `#${tag}`;

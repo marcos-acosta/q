@@ -14,6 +14,7 @@ export const TAG_COLORS = {
   PURPLE: "#B0A1BA",
 };
 
+// Fonts
 export const MANROPE = Manrope({ weight: "500", subsets: ["latin"] });
 export const SOURCE_CODE_PRO = Source_Code_Pro({
   weight: "400",
@@ -39,4 +40,12 @@ export const tagToColor = (tag: string) => {
   return Object.values(TAG_COLORS)[
     hashString(tag) % Object.keys(TAG_COLORS).length
   ];
+};
+
+export const capitalize = (text: string) => {
+  if (text.length === 0) {
+    return "";
+  } else {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
 };
