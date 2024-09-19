@@ -1,15 +1,5 @@
-import {
-  EffortType,
-  Item,
-  ItemSchema,
-  PriorityLevel,
-} from "@/app/interfaces/item";
+import { EffortType, Item, PriorityLevel } from "@/app/interfaces/item";
 import { regex } from "regex";
-import { v4 as uuidv4 } from "uuid";
-import {
-  addIntervalToDate,
-  getStartOfPreviousPeriod,
-} from "../dates/date-util";
 import {
   parsePriority,
   parsePriorityFromString,
@@ -18,139 +8,155 @@ import {
   parseTimeInterval,
   TimeInterval,
 } from "./parsing-util";
+import {
+  Field,
+  getFlagRegex,
+  InterpretedSpecPart,
+  ParseResult,
+  SpecParser,
+  splitInputSpecIntoParts,
+} from "./spec-parsing";
 
-const regex_no_x = regex({
-  disable: { x: true },
-});
-const regex_g_no_x = regex({ flags: "g", disable: { x: true } });
+const nameRegex = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
+const tagRegex = regex("dg")`\s?(?<arg>\#(?<value>\S+))\s?`;
 
-const TASK_NAME_PATTERN = regex_no_x`^(?<name>.+?)($|( [\-#]))`;
-const DURATION_PATTERN = regex_no_x` -t (?<duration_minutes>(\d)+[hm])\b`;
-const TIMES_PATTERN = regex_no_x` -x (?<times>(\d)+)\b`;
-const RECURRENCE_PATTERN = regex_no_x` -e (?<recurrence>(\d)*[dwmy])\b`;
-const URGENCY_PATTERN = regex_no_x` -u (?<urgency>(\d)*[dwmy])\b`;
-const HARD_DEADLINE_PATTERN = regex_no_x` -h (?<hard_deadline>[0-9a-zA-Z\-]+)\b`;
-const PRIORITY_PATTERN = regex_no_x` -p(?<priority>[0-4])\b`;
-const TAG_PATTERN = regex_g_no_x` #(?<tag>[^\s]+)\b`;
-const DURATION_BASED_FLAG = regex_no_x` -d\b`;
-const GOAL_FLAG = regex_no_x` -g\b`;
-
-const matchItemInputPart = (
-  item_spec: string,
-  pattern: RegExp,
-  parser?: (a: string) => any,
-  group_name?: string
-) => {
-  const matches = item_spec.match(pattern);
-  let response;
-  if (parser && group_name) {
-    if (matches?.groups && matches.groups[group_name]) {
-      response = parser(matches.groups[group_name]);
+const assembleItemFromParts = (
+  parts: InterpretedSpecPart[]
+): ParseResult<Item> => {
+  let partialItem = {} as Partial<Item>;
+  const interpretedParts = parts.map((part) => {
+    let newPart = part;
+    if (!newPart.error && newPart.result) {
+      const parsedValue = newPart.result.parsed_value;
+      let durationMinutes = undefined as number | undefined;
+      let isHardDeadline = false;
+      let dueDate = undefined as Date | undefined;
+      switch (newPart.field) {
+        case Field.ITEM_NAME:
+          partialItem.name = parsedValue as string;
+          break;
+        case Field.ITEM_PRIORITY:
+          partialItem.priority = parsedValue as PriorityLevel;
+          break;
+        case Field.ITEM_TAGS:
+          partialItem.tags = [
+            ...(partialItem.tags || []),
+            parsedValue as string,
+          ];
+          break;
+        case Field.ITEM_IS_DURATION_BASED:
+          partialItem.effort_type = EffortType.DURATION;
+          break;
+        case Field.ITEM_DURATION:
+          durationMinutes = parsedValue as number;
+          break;
+        case Field.ITEM_IS_HARD_DEADLINE:
+          isHardDeadline = true;
+          break;
+        case Field.ITEM_URGENCY:
+          dueDate = parsedValue as Date;
+          break;
+        case Field.ITEM_TIMES:
+          partialItem.time_spec = {
+            ...partialItem.time_spec,
+            required_number_of_completions: parsedValue as number,
+          };
+          break;
+        case Field.ITEM_INVERSE_FREQUENCY:
+          partialItem.time_spec = {
+            ...partialItem.time_spec,
+            recurrence: {
+              ...partialItem.time_spec?.recurrence,
+              inverse_frequency: (parsedValue as TimeInterval).quantity,
+              unit: (parsedValue as TimeInterval).unit,
+              start_date: new Date(),
+            },
+          };
+          break;
+      }
+      if (!partialItem.effort_type) {
+        partialItem.effort_type = EffortType.COMPLETION;
+      }
+      switch (partialItem.effort_type) {
+        case EffortType.COMPLETION:
+          partialItem.time_spec = {
+            ...partialItem.time_spec,
+            estimated_time_effort_minutes: durationMinutes,
+          };
+          break;
+        case EffortType.DURATION:
+          partialItem.time_spec = {
+            ...partialItem.time_spec,
+            required_time_effort_minutes: durationMinutes,
+          };
+          break;
+      }
+      if (dueDate) {
+        partialItem.time_spec = {
+          ...partialItem.time_spec,
+          urgency: {
+            ...partialItem.time_spec?.urgency,
+            expected_completion_date: isHardDeadline ? undefined : dueDate,
+            hard_deadline: isHardDeadline ? dueDate : undefined,
+          },
+        };
+      }
     }
-  } else {
-    return Boolean(matches);
-  }
-  return response;
-};
-
-const matchTags = (item_spec: string): string[] => {
-  const matches = item_spec.matchAll(TAG_PATTERN);
-  let tags = [];
-  for (const match of matches) {
-    if (match.groups && match.groups["tag"]) {
-      tags.push(match.groups["tag"]);
-    }
-  }
-  return tags;
-};
-
-const constructPartialItemFromResults = (
-  results: {
-    [a: string]: any;
-  },
-  spec: string
-): Partial<Item> => {
-  const recurrence = results["recurrence"] as undefined | TimeInterval;
-  const urgency = results["urgency"] as undefined | TimeInterval;
-  const duration_minutes = results["duration_minutes"] as undefined | number;
-  const times = results["times"] as undefined | number;
-  const priority = results["priority"] as undefined | PriorityLevel;
-  const is_duration_effort = results["is_duration_based"];
-  const hard_deadline = results["hard_deadline"];
-  const expected_completion_date =
-    urgency &&
-    addIntervalToDate(
-      getStartOfPreviousPeriod(new Date(), urgency.unit),
-      urgency
-    );
-  const urgency_exists = expected_completion_date || hard_deadline;
-  let item: Partial<Item> = {
-    name: results["name"],
-    id: uuidv4(),
-    creation_timestamp: Date.now(),
-    creation_spec: spec,
-    effort_type: is_duration_effort
-      ? EffortType.DURATION
-      : EffortType.COMPLETION,
-    dependency_ids: [],
-    dependent_ids: [],
-    time_spec: {
-      recurrence: recurrence
-        ? {
-            inverse_frequency: recurrence.quantity,
-            unit: recurrence.unit,
-            start_date: getStartOfPreviousPeriod(new Date(), recurrence.unit),
-          }
-        : undefined,
-      urgency: urgency_exists
-        ? {
-            expected_completion_date: expected_completion_date,
-            hard_deadline: hard_deadline,
-          }
-        : undefined,
-      required_time_effort_minutes: is_duration_effort
-        ? duration_minutes
-        : undefined,
-      estimated_time_effort_minutes: is_duration_effort
-        ? undefined
-        : duration_minutes,
-      required_number_of_completions: is_duration_effort
-        ? undefined
-        : times
-        ? times
-        : 1,
-    },
-    tags: results["tags"],
-    is_goal: results["is_goal"],
-    priority: priority,
-  };
-  return item;
-};
-
-export const parseItemInput = (item_spec: string): Item => {
-  const parsers: Array<[RegExp, ((a: string) => any) | undefined, string]> = [
-    [TASK_NAME_PATTERN, (x: string) => x, "name"],
-    [DURATION_PATTERN, parseTimeDurationToMinutes, "duration_minutes"],
-    [RECURRENCE_PATTERN, parseTimeInterval, "recurrence"],
-    [URGENCY_PATTERN, parseTimeInterval, "urgency"],
-    [TIMES_PATTERN, parseInt, "times"],
-    [PRIORITY_PATTERN, parsePriorityFromString, "priority"],
-    [HARD_DEADLINE_PATTERN, parseStringToDate, "hard_deadline"],
-    [DURATION_BASED_FLAG, undefined, "is_duration_based"],
-    [GOAL_FLAG, undefined, "is_goal"],
-  ];
-
-  const parseResults: { [key: string]: any } = {};
-  parsers.forEach(([pattern, parser, group_name]) => {
-    try {
-      const res = matchItemInputPart(item_spec, pattern, parser, group_name);
-      parseResults[group_name] = res;
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
+    return newPart;
   });
-  parseResults["tags"] = matchTags(item_spec);
-  const partialItem = constructPartialItemFromResults(parseResults, item_spec);
-  return ItemSchema.parse(partialItem);
+  return {
+    partial_item: partialItem,
+    input_spec_parts: interpretedParts,
+    any_error: interpretedParts.some((part) => part.error),
+  };
+};
+
+const ITEM_PARSERS: SpecParser[] = [
+  {
+    field: Field.ITEM_NAME,
+    matcher: nameRegex,
+  },
+  {
+    field: Field.ITEM_PRIORITY,
+    matcher: getFlagRegex("p"),
+    value_parser: parsePriorityFromString,
+  },
+  {
+    field: Field.ITEM_TAGS,
+    matcher: tagRegex,
+    is_global: true,
+  },
+  {
+    field: Field.ITEM_IS_DURATION_BASED,
+    matcher: getFlagRegex("d", true),
+  },
+  {
+    field: Field.ITEM_DURATION,
+    matcher: getFlagRegex("t"),
+    value_parser: parseTimeDurationToMinutes,
+  },
+  {
+    field: Field.ITEM_IS_HARD_DEADLINE,
+    matcher: getFlagRegex("h", true),
+  },
+  {
+    field: Field.ITEM_TIMES,
+    matcher: getFlagRegex("x"),
+    value_parser: parseInt,
+  },
+  {
+    field: Field.ITEM_INVERSE_FREQUENCY,
+    matcher: getFlagRegex("e"),
+    value_parser: parseTimeInterval,
+  },
+  {
+    field: Field.ITEM_URGENCY,
+    matcher: getFlagRegex("u"),
+    value_parser: parseStringToDate,
+  },
+];
+
+export const parseItemInputSpec = (inputSpec: string): ParseResult<Item> => {
+  const itemSpecParts = splitInputSpecIntoParts(inputSpec, ITEM_PARSERS);
+  return assembleItemFromParts(itemSpecParts);
 };

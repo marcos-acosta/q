@@ -8,6 +8,8 @@ const LETTER_TO_TIME_UNIT: { [key: string]: TimeUnit } = {
   y: TimeUnit.YEAR,
 };
 
+const YMD_PATTERN = regex`(?<year>\d{4})-(?<month>\d{2})-(?<date>\d{2})`;
+
 export interface TimeInterval {
   quantity: number;
   unit: TimeUnit;
@@ -69,7 +71,17 @@ export const parsePriority = (priority: number): PriorityLevel => {
   ][priority];
 };
 
-export const parseStringToDate = (dateString: string): Date => {
+export const parseStringToDate = (timeExpression: string): Date => {
   // TODO
-  return new Date(dateString);
+  const ymdMatch = timeExpression.match(YMD_PATTERN);
+  if (ymdMatch && ymdMatch.groups) {
+    let newDate = new Date();
+    newDate.setHours(0);
+    newDate.setFullYear(parseInt(ymdMatch.groups["year"]));
+    newDate.setMonth(parseInt(ymdMatch.groups["month"]) - 1);
+    newDate.setDate(parseInt(ymdMatch.groups["date"]));
+    return newDate;
+  } else {
+    throw Error("Unimplemented");
+  }
 };
