@@ -1,42 +1,28 @@
-import {
-  Item,
-  ItemSchema,
-  PriorityLevel,
-  TimeUnit,
-} from "@/app/interfaces/item";
-import { regex } from "regex";
+import { Item, ItemSchema } from "@/app/interfaces/item";
 import { NamedQuery, NamedQuerySchema } from "@/app/interfaces/query";
 
-export const parseListAsItems = (raw_item_data: any): Item[] => {
-  if (!Array.isArray(raw_item_data)) {
+function parseListAs<T>(rawData: any, parseFn: (a: any) => T): T[] {
+  if (!Array.isArray(rawData)) {
     return [];
   }
-  let response = [] as Item[];
-  raw_item_data.forEach((raw_item: any) => {
+  let response = [] as T[];
+  rawData.forEach((rawElement: any) => {
     try {
-      const parsed_item: Item = ItemSchema.parse(raw_item);
-      response.push(parsed_item);
+      const parsedElement = parseFn(rawElement);
+      response.push(parsedElement);
     } catch (e) {
       console.log(e);
     }
   });
   return response;
+}
+
+export const parseListAsItems = (rawItemData: any): Item[] => {
+  return parseListAs<Item>(rawItemData, (i: any) => ItemSchema.parse(i));
 };
 
-export const parseListAsNamedQueries = (
-  raw_named_queries: any
-): NamedQuery[] => {
-  if (!Array.isArray(raw_named_queries)) {
-    return [];
-  }
-  let response = [] as NamedQuery[];
-  raw_named_queries.forEach((raw_named_query: any) => {
-    try {
-      const parsed_query: NamedQuery = NamedQuerySchema.parse(raw_named_query);
-      response.push(parsed_query);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-  return response;
+export const parseListAsNamedQueries = (rawQueryData: any): NamedQuery[] => {
+  return parseListAs<NamedQuery>(rawQueryData, (nq: any) =>
+    NamedQuerySchema.parse(nq)
+  );
 };

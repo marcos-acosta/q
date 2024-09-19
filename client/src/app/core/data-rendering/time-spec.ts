@@ -25,17 +25,17 @@ const MONTHS_OF_THE_YEAR = [
   "dec",
 ];
 
-const formatCompletionTime = (time_minutes: number) => {
-  const minutes_remainder = time_minutes % MINUTES_IN_HOUR;
-  const hours = Math.floor(time_minutes / MINUTES_IN_HOUR);
+const formatCompletionTime = (timeMinutes: number) => {
+  const minutesRemainder = timeMinutes % MINUTES_IN_HOUR;
+  const hours = Math.floor(timeMinutes / MINUTES_IN_HOUR);
   if (hours > 0) {
-    if (minutes_remainder > 0) {
-      return `${hours}h${minutes_remainder}m`;
+    if (minutesRemainder > 0) {
+      return `${hours}h${minutesRemainder}m`;
     } else {
       return `${hours}h`;
     }
   } else {
-    return `${minutes_remainder}m`;
+    return `${minutesRemainder}m`;
   }
 };
 
@@ -51,29 +51,29 @@ const convertFrequencyToWords = (frequency: number): string => {
 
 const convertEffortToWords = (item: Item): string | null => {
   if (item.effort_type == EffortType.COMPLETION) {
-    const num_completions = item.time_spec?.required_number_of_completions;
-    if (!num_completions || num_completions < 1) {
+    const numCompletions = item.time_spec?.required_number_of_completions;
+    if (!numCompletions || numCompletions < 1) {
       return null;
     }
-    return convertFrequencyToWords(num_completions);
+    return convertFrequencyToWords(numCompletions);
   } else {
-    const duration_minutes = item.time_spec?.required_time_effort_minutes;
-    if (!duration_minutes || duration_minutes < 1) {
+    const durationMinutes = item.time_spec?.required_time_effort_minutes;
+    if (!durationMinutes || durationMinutes < 1) {
       return null;
     }
-    return formatCompletionTime(duration_minutes);
+    return formatCompletionTime(durationMinutes);
   }
 };
 
 const convertRecurrenceToWords = (item: Item): string | null => {
   if (item.time_spec?.recurrence) {
-    const inverse_freq = item.time_spec.recurrence.inverse_frequency;
-    const inverse_frequency_word =
-      inverse_freq === 1 ? "a" : `every ${inverse_freq}`;
+    const inverseFreq = item.time_spec.recurrence.inverse_frequency;
+    const inverseFrequencyWord =
+      inverseFreq === 1 ? "a" : `every ${inverseFreq}`;
     const unit_word = `${UNIT_TO_WORD[item.time_spec.recurrence.unit]}${
-      inverse_freq != 1 ? "s" : ""
+      inverseFreq != 1 ? "s" : ""
     }`;
-    return `${inverse_frequency_word} ${unit_word}`;
+    return `${inverseFrequencyWord} ${unit_word}`;
   } else {
     return null;
   }
@@ -123,14 +123,14 @@ const formatDateToWordsRelative = (date: Date) => {
 
 export const summarizeTaskTimeSpec = (item: Item): string | null => {
   const effort = convertEffortToWords(item);
-  const effort_filtered = effort === "once" ? null : effort;
+  const effortFiltered = effort === "once" ? null : effort;
   const recurrence = convertRecurrenceToWords(item);
   const recurrence_adjusted =
-    !effort_filtered && recurrence
+    !effortFiltered && recurrence
       ? recurrence.replace(regex`^a\s`, "every ")
       : recurrence;
   const urgency = convertUrgencyToWords(item);
-  const inOrder = [effort_filtered, recurrence_adjusted, urgency].filter(
+  const inOrder = [effortFiltered, recurrence_adjusted, urgency].filter(
     Boolean
   );
   return inOrder.join(" ");

@@ -6,33 +6,33 @@ import {
 
 export const getCompletionForDate = (item: Item, date: Date) => {
   const recurrence = item.time_spec?.recurrence;
-  let progress_filter = (p: Progress) => false;
+  let progressDateFilter = (p: Progress) => false;
   if (recurrence) {
     const range = findPeriodForDateGivenRecurrence(date, recurrence);
     if (range) {
-      progress_filter = (p: Progress) => {
-        const progress_time_period = findPeriodForDateGivenRecurrence(
+      progressDateFilter = (p: Progress) => {
+        const progressPeriod = findPeriodForDateGivenRecurrence(
           new Date(p.timestamp),
           recurrence
         );
         return Boolean(
-          progress_time_period && dateRangesEqual(progress_time_period, range)
+          progressPeriod && dateRangesEqual(progressPeriod, range)
         );
       };
     }
   } else {
-    progress_filter = (p: Progress) => true;
+    // If not recurring, the date doesn't matter.
+    progressDateFilter = (p: Progress) => true;
   }
-  // If not recurring, the date doesn't matter.
-  let times_total = 0;
-  let duration_total = 0;
-  item.progress.filter(progress_filter).forEach((contribution) => {
-    times_total += contribution.contribution_times || 0;
-    duration_total += contribution.contribution_minutes || 0;
+  let timesTotal = 0;
+  let durationTotal = 0;
+  item.progress.filter(progressDateFilter).forEach((contribution) => {
+    timesTotal += contribution.contribution_times || 0;
+    durationTotal += contribution.contribution_minutes || 0;
   });
   return {
-    [EffortType.COMPLETION]: times_total,
-    [EffortType.DURATION]: duration_total,
+    [EffortType.COMPLETION]: timesTotal,
+    [EffortType.DURATION]: durationTotal,
   };
 };
 
@@ -43,17 +43,26 @@ export const getQuota = (item: Item) => {
   };
 };
 
-export const getItemCompletionStatus = (item: Item, date: Date) => {
+export interface CompletionStatus {
+  progress: number;
+  quota?: number;
+  is_completed: boolean;
+}
+
+export const getItemCompletionStatus = (
+  item: Item,
+  date: Date
+): CompletionStatus => {
   const item_completion = getCompletionForDate(item, date);
   const quota = getQuota(item);
-  const effort_type = item.effort_type;
-  const progress = item_completion[effort_type];
-  const required = quota[effort_type];
-  const is_completed = required ? progress >= required : progress > 0;
+  const effortType = item.effort_type;
+  const progress = item_completion[effortType];
+  const required = quota[effortType];
+  const isCompleted = required ? progress >= required : progress > 0;
   return {
     progress: progress,
     quota: required,
-    is_completed: is_completed,
+    is_completed: isCompleted,
   };
 };
 
@@ -61,15 +70,16 @@ export const updateItemWithProgress = (
   item: Item,
   progress: Progress
 ): Item => {
-  const new_item: Item = {
+  const newItem: Item = {
     ...item,
     progress: [...item.progress, progress],
   };
+  // Archive if not recurring and is completed
   if (
-    new_item.time_spec?.recurrence &&
-    getItemCompletionStatus(new_item, new Date()).is_completed
+    !newItem.time_spec?.recurrence &&
+    getItemCompletionStatus(newItem, new Date()).is_completed
   ) {
-    new_item.is_archived = true;
+    newItem.is_archived = true;
   }
-  return new_item;
+  return newItem;
 };

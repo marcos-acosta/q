@@ -23,37 +23,37 @@ export const DEFAULT_QUERY: Query = {
   tag_matchers: [],
 };
 
-const considerNegation = (meets_requirement: boolean, negated: boolean) =>
-  meets_requirement !== negated;
+const considerNegation = (meetsRequirement: boolean, negated: boolean) =>
+  meetsRequirement !== negated;
 
 const doesItemMeetKeywordRequirement = (
   item: Item,
   keyword: KeywordMatcher
 ) => {
-  const item_name_has_keyword = item.name
+  const itemNameHasKeyword = item.name
     .toLowerCase()
     .includes(keyword.keyword.toLowerCase());
-  return considerNegation(item_name_has_keyword, keyword.negated);
+  return considerNegation(itemNameHasKeyword, keyword.negated);
 };
 
 const doesItemMeetTagRequirement = (item: Item, tagMatcher: KeywordMatcher) => {
-  const item_has_tag = item.tags.includes(tagMatcher.keyword);
-  return considerNegation(item_has_tag, tagMatcher.negated);
+  const itemHasTag = item.tags.includes(tagMatcher.keyword);
+  return considerNegation(itemHasTag, tagMatcher.negated);
 };
 
 const doesItemMeetBooleanRequirement = (
   item: Item,
   booleanMatcher: BooleanMatcher
 ) => {
-  let meets_requirement = false;
+  let meetsRequirement = false;
   switch (booleanMatcher.field) {
     case BooleanItemField.ARCHIVED:
-      meets_requirement = item.is_archived;
+      meetsRequirement = item.is_archived;
       break;
     default:
-      meets_requirement = false;
+      meetsRequirement = false;
   }
-  return considerNegation(meets_requirement, booleanMatcher.negated);
+  return considerNegation(meetsRequirement, booleanMatcher.negated);
 };
 
 const compareValues = (
