@@ -9,6 +9,7 @@ import { parseInputToQuery } from "@/app/core/input-parsing/query-parsing";
 import FullScreenInput from "./FullScreenInput";
 import { parseItemInput } from "@/app/core/input-parsing/item-parsing";
 import { Query } from "../interfaces/query";
+import { parseItemInputSpec } from "../core/input-parsing/item-parsing-v2";
 
 export interface CommandBarProps {
   addItem: (i: Item) => void;
@@ -46,9 +47,10 @@ export default function CommandBar(props: CommandBarProps) {
 
   const addItem = () => {
     try {
-      const item: Item = parseItemInput(inputSpec);
-      props.addItem(item);
-      setInputSpec("");
+      console.log(parseItemInputSpec(inputSpec));
+      // const item: Item = parseItemInput(inputSpec);
+      // props.addItem(item);
+      // setInputSpec("");
     } catch (e) {
       console.log(e);
     }

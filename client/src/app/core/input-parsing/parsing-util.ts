@@ -46,8 +46,17 @@ export const parseTimeInterval = (time_interval: string): TimeInterval => {
   throw Error(`Failed to parse time interval: ${time_interval}`);
 };
 
-export const parsePriority = (priority_string: string): PriorityLevel => {
-  const priority = parseInt(priority_string);
+export const parsePriorityFromString = (
+  priorityString: string
+): PriorityLevel => {
+  try {
+    return parsePriority(parseInt(priorityString));
+  } catch (e) {
+    throw Error(`Failed to parse ${priorityString} as a number`);
+  }
+};
+
+export const parsePriority = (priority: number): PriorityLevel => {
   if (priority < 0 || priority > 4) {
     throw Error(`Priority out of bounds: ${priority}`);
   }

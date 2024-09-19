@@ -12,6 +12,7 @@ import {
 } from "../dates/date-util";
 import {
   parsePriority,
+  parsePriorityFromString,
   parseStringToDate,
   parseTimeDurationToMinutes,
   parseTimeInterval,
@@ -133,7 +134,7 @@ export const parseItemInput = (item_spec: string): Item => {
     [RECURRENCE_PATTERN, parseTimeInterval, "recurrence"],
     [URGENCY_PATTERN, parseTimeInterval, "urgency"],
     [TIMES_PATTERN, parseInt, "times"],
-    [PRIORITY_PATTERN, parsePriority, "priority"],
+    [PRIORITY_PATTERN, parsePriorityFromString, "priority"],
     [HARD_DEADLINE_PATTERN, parseStringToDate, "hard_deadline"],
     [DURATION_BASED_FLAG, undefined, "is_duration_based"],
     [GOAL_FLAG, undefined, "is_goal"],
