@@ -1,4 +1,11 @@
-import { EffortType, Item, PriorityLevel } from "@/app/interfaces/item";
+import {
+  EffortType,
+  Item,
+  PriorityLevel,
+  Recurrence,
+  TimeSpec,
+  Urgency,
+} from "@/app/interfaces/item";
 import { regex } from "regex";
 import {
   parsePriorityFromString,
@@ -19,6 +26,38 @@ import {
 
 const NAME_REGEX = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
 
+const addTimeSpecFieldToPartialItem = (
+  pi: Partial<Item>,
+  ts: Partial<TimeSpec>
+) => {
+  pi.time_spec = { ...pi.time_spec, ...ts };
+  return pi;
+};
+
+const addTagToPartialItem = (pi: Partial<Item>, tag: string) => {
+  pi.tags = [...(pi.tags || []), tag];
+  return pi;
+};
+
+const addRecurrenceToPartialItem = (
+  pi: Partial<Item>,
+  recurrence: Recurrence
+) => {
+  pi.time_spec = {
+    ...pi.time_spec,
+    recurrence: recurrence,
+  };
+  return pi;
+};
+
+const addUrgencyToPartialItem = (pi: Partial<Item>, pu: Partial<Urgency>) => {
+  pi.time_spec = {
+    ...pi.time_spec,
+    urgency: { ...pi.time_spec?.urgency, ...pu },
+  };
+  return pi;
+};
+
 const assembleItemFromParts = (
   parts: InterpretedSpecPart[]
 ): ParseResult<Item> => {
@@ -38,10 +77,7 @@ const assembleItemFromParts = (
           partialItem.priority = parsedValue as PriorityLevel;
           break;
         case Field.ITEM_TAGS:
-          partialItem.tags = [
-            ...(partialItem.tags || []),
-            parsedValue as string,
-          ];
+          addTagToPartialItem(partialItem, parsedValue as string);
           break;
         case Field.ITEM_IS_DURATION_BASED:
           partialItem.effort_type = EffortType.DURATION;
@@ -56,21 +92,16 @@ const assembleItemFromParts = (
           dueDate = parsedValue as Date;
           break;
         case Field.ITEM_TIMES:
-          partialItem.time_spec = {
-            ...partialItem.time_spec,
+          addTimeSpecFieldToPartialItem(partialItem, {
             required_number_of_completions: parsedValue as number,
-          };
+          });
           break;
         case Field.ITEM_INVERSE_FREQUENCY:
-          partialItem.time_spec = {
-            ...partialItem.time_spec,
-            recurrence: {
-              ...partialItem.time_spec?.recurrence,
-              inverse_frequency: (parsedValue as TimeInterval).quantity,
-              unit: (parsedValue as TimeInterval).unit,
-              start_date: new Date(),
-            },
-          };
+          addRecurrenceToPartialItem(partialItem, {
+            inverse_frequency: (parsedValue as TimeInterval).quantity,
+            unit: (parsedValue as TimeInterval).unit,
+            start_date: new Date(),
+          });
           break;
       }
     }
@@ -81,27 +112,21 @@ const assembleItemFromParts = (
   }
   switch (partialItem.effort_type) {
     case EffortType.COMPLETION:
-      partialItem.time_spec = {
-        ...partialItem.time_spec,
+      addTimeSpecFieldToPartialItem(partialItem, {
         estimated_time_effort_minutes: durationMinutes,
-      };
+      });
       break;
     case EffortType.DURATION:
-      partialItem.time_spec = {
-        ...partialItem.time_spec,
+      addTimeSpecFieldToPartialItem(partialItem, {
         required_time_effort_minutes: durationMinutes,
-      };
+      });
       break;
   }
   if (dueDate) {
-    partialItem.time_spec = {
-      ...partialItem.time_spec,
-      urgency: {
-        ...partialItem.time_spec?.urgency,
-        expected_completion_date: isHardDeadline ? undefined : dueDate,
-        hard_deadline: isHardDeadline ? dueDate : undefined,
-      },
-    };
+    addUrgencyToPartialItem(partialItem, {
+      expected_completion_date: isHardDeadline ? undefined : dueDate,
+      hard_deadline: isHardDeadline ? dueDate : undefined,
+    });
   }
   return {
     partial_result: partialItem,
