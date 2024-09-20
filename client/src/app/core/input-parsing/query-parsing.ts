@@ -1,3 +1,4 @@
+import { parseDueDateToDate } from "./parsing-util";
 import {
   Field,
   getFlagRegex,
@@ -110,7 +111,7 @@ const QUERY_PARSERS: SpecParser[] = [
   {
     field: Field.QUERY_DUE_DATE,
     matcher: getFlagRegex("d", false, false),
-    value_parser: (s: string) => s,
+    value_parser: parseDueDateToDate,
   },
 ];
 

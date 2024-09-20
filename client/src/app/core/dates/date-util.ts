@@ -10,6 +10,9 @@ import {
   differenceInYears,
   isSameDay,
   subDays,
+  subMonths,
+  subWeeks,
+  subYears,
 } from "date-fns";
 import { TimeInterval } from "../input-parsing/parsing-util";
 
@@ -117,6 +120,28 @@ export const addIntervalToDate = (date: Date, interval: TimeInterval): Date => {
       break;
   }
   return addFn(date, interval.quantity);
+};
+
+export const subIntervalFromDate = (
+  date: Date,
+  interval: TimeInterval
+): Date => {
+  let subFn: (d: Date, n: number) => Date;
+  switch (interval.unit) {
+    case TimeUnit.DAY:
+      subFn = subDays;
+      break;
+    case TimeUnit.WEEK:
+      subFn = subWeeks;
+      break;
+    case TimeUnit.MONTH:
+      subFn = subMonths;
+      break;
+    case TimeUnit.YEAR:
+      subFn = subYears;
+      break;
+  }
+  return subFn(date, interval.quantity);
 };
 
 export const dateRangesEqual = (d1: DateRange, d2: DateRange) =>

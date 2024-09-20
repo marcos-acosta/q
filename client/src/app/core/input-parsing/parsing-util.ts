@@ -3,6 +3,7 @@ import { regex } from "regex";
 import {
   addIntervalToDate,
   getStartOfPreviousPeriod,
+  subIntervalFromDate,
 } from "../dates/date-util";
 import { subDays } from "date-fns";
 
@@ -77,9 +78,22 @@ export const parsePriority = (priority: number): PriorityLevel => {
   ][priority];
 };
 
-export const parseStringToDate = (timeExpression: string): Date => {
-  const ymdMatch = timeExpression.match(YMD_PATTERN);
-  const mdMatch = timeExpression.match(MD_PATTERN);
+const convertRoughDurationToDate = (duration: string) => {
+  try {
+    const timeInterval = parseTimeInterval(duration);
+    const startOfPeriod = getStartOfPreviousPeriod(
+      new Date(),
+      timeInterval.unit
+    );
+    return subDays(addIntervalToDate(startOfPeriod, timeInterval), 1);
+  } catch (e) {
+    throw Error(`Could not parse ${duration} as a date.`);
+  }
+};
+
+const convertDateStringToDate = (dateString: string) => {
+  const ymdMatch = dateString.match(YMD_PATTERN);
+  const mdMatch = dateString.match(MD_PATTERN);
   if (ymdMatch && ymdMatch.groups) {
     let newDate = new Date();
     newDate.setHours(0);
@@ -92,19 +106,39 @@ export const parseStringToDate = (timeExpression: string): Date => {
     newDate.setHours(0);
     newDate.setMonth(parseInt(mdMatch.groups["month"]) - 1);
     newDate.setDate(parseInt(mdMatch.groups["date"]));
+    if (newDate < new Date()) {
+      newDate.setFullYear(newDate.getFullYear() + 1);
+    }
     return newDate;
   } else {
-    try {
-      const timeInterval = parseTimeInterval(timeExpression);
-      const startOfPeriod = getStartOfPreviousPeriod(
-        new Date(),
-        timeInterval.unit
-      );
-      return subDays(addIntervalToDate(startOfPeriod, timeInterval), 1);
-    } catch (e) {
-      throw Error(`Could not parse ${timeExpression} as a date.`);
-    }
+    throw Error(`Could not parse ${dateString} as a date.`);
   }
 };
 
-// export const parseDueDate
+export const parseStringToDate = (timeExpression: string): Date => {
+  try {
+    return convertDateStringToDate(timeExpression);
+  } catch (e) {
+    return convertRoughDurationToDate(timeExpression);
+  }
+};
+
+export const parseDueDateToDate = (timeExpression: string): Date => {
+  // Relative expression
+  if (timeExpression.startsWith("t")) {
+    let diffFn;
+    if (timeExpression === "t") {
+      return new Date();
+    } else if (timeExpression.startsWith("t+")) {
+      diffFn = addIntervalToDate;
+    } else if (timeExpression.startsWith("t-")) {
+      diffFn = subIntervalFromDate;
+    } else {
+      throw Error(`Could not parse ${timeExpression} as a date.`);
+    }
+    const intervalAmount = parseTimeInterval(timeExpression.slice(2));
+    return diffFn(new Date(), intervalAmount);
+  } else {
+    return parseStringToDate(timeExpression);
+  }
+};
