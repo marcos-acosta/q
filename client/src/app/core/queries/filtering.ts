@@ -10,6 +10,7 @@ import {
   QueryComparableType,
 } from "@/app/interfaces/query";
 import { getNearestDueDateInclusive } from "../dates/date-util";
+import { getItemCompletionStatus } from "../data/progress";
 
 export const DEFAULT_QUERY: Query = {
   keywords: [],
@@ -49,6 +50,9 @@ const doesItemMeetBooleanRequirement = (
   switch (booleanMatcher.field) {
     case BooleanItemField.ARCHIVED:
       meetsRequirement = item.is_archived;
+      break;
+    case BooleanItemField.COMPLETED:
+      meetsRequirement = getItemCompletionStatus(item, new Date()).is_completed;
       break;
     default:
       meetsRequirement = false;

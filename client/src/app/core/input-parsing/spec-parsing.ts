@@ -10,16 +10,40 @@ export enum Field {
   ITEM_TIMES,
   ITEM_INVERSE_FREQUENCY,
   ITEM_URGENCY,
+  QUERY_KEYWORD,
+  QUERY_TAGS,
+  QUERY_ARCHIVED,
+  QUERY_COMPLETED,
+  QUERY_DUE_DATE,
 }
 
 export const REGEX_VALUE_NAME = "value";
 export const REGEX_ARG_NAME = "arg";
+export const REGEX_NEGATION_NAME = "neg";
 
-export const getFlagRegex = (code: string, isBoolean?: boolean) => {
+export const getFlagRegex = (
+  code: string,
+  isBoolean?: boolean,
+  allowNegation?: boolean
+) => {
   return isBoolean
-    ? regex("d")`(\s|^)(?<arg>-${code})(\s|$)`
+    ? allowNegation
+      ? regex("d")`(\s|^)(?<arg>-(?<neg>!)?${code})(\s|$)`
+      : regex("d")`(\s|^)(?<arg>-${code})(\s|$)`
     : regex("d")`(\s|^)(?<arg>-${code}\s+(?<value>\S+))(\s|$)`;
 };
+
+export const getTagRegex = (allowNegation?: boolean) =>
+  allowNegation
+    ? regex("dg")`\s?(?<arg>(?<neg>!)?\#(?<value>\S+))\s?`
+    : regex("dg")`\s?(?<arg>\#(?<value>\S+))\s?`;
+
+export const getKeywordRegex = (allowNegation?: boolean) =>
+  allowNegation
+    ? regex("dg")`(\s|^)(?<arg>(?<neg>!)?(?<value>[^!\-\#\s]+))`
+    : regex("dg")`(\s|^)(?<arg>(?<value>[^!\-\#\s]+))`;
+
+const DEFAULT_ARG_INDEX = 1;
 
 export interface SpecParser {
   field: Field;
@@ -35,6 +59,7 @@ export interface InterpretedSpecPart {
     parsed_value: any;
     index_start_inclusive: number;
     index_end_exclusive: number;
+    negated: boolean;
   };
   error?: string;
 }
@@ -65,11 +90,15 @@ const applyParserToSpec = (
         interpretedPart.result = {
           original_string: matchResult.groups[REGEX_ARG_NAME],
           parsed_value: parsedValue,
-          index_start_inclusive: matchResult.indices[1][0],
-          index_end_exclusive: matchResult.indices[1][1],
+          index_start_inclusive: matchResult.indices[DEFAULT_ARG_INDEX][0],
+          index_end_exclusive: matchResult.indices[DEFAULT_ARG_INDEX][1],
+          negated: Boolean(
+            REGEX_NEGATION_NAME in matchResult.groups &&
+              matchResult.groups[REGEX_NEGATION_NAME]
+          ),
         };
       } catch (e) {
-        interpretedPart.error = `Could not parse "${matchResult.groups[REGEX_ARG_NAME]}."`;
+        interpretedPart.error = `Could not parse "${matchResult.groups[REGEX_ARG_NAME]}"`;
       }
       results.push(interpretedPart as InterpretedSpecPart);
     }
@@ -89,7 +118,7 @@ export const splitInputSpecIntoParts = (
 };
 
 export interface ParseResult<T> {
-  partial_item?: Partial<T>;
+  partial_result?: Partial<T>;
   input_spec_parts: InterpretedSpecPart[];
   any_error: boolean;
 }

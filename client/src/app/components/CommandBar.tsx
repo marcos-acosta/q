@@ -5,11 +5,11 @@ import { combineClasses, SOURCE_CODE_PRO } from "@/app/core/styling/css";
 import { useEffect, useState } from "react";
 import styles from "@/app/css/CommandBar.module.css";
 import { callbackOnEnter } from "@/app/core/styling/jsx-util";
-import { parseInputToQuery } from "@/app/core/input-parsing/query-parsing";
 import FullScreenInput from "./FullScreenInput";
-import { Query } from "../interfaces/query";
+import { Query, QuerySchema } from "../interfaces/query";
 import { parseItemInputSpec } from "../core/input-parsing/item-parsing";
 import { v4 } from "uuid";
+import { parseQueryInputSpec } from "../core/input-parsing/query-parsing";
 
 export interface CommandBarProps {
   addItem: (i: Item) => void;
@@ -28,7 +28,10 @@ export default function CommandBar(props: CommandBarProps) {
   const [commandBarMode, setCommandBarMode] = useState(CommandBarMode.ADD);
   const [isSavingQuery, setIsSavingQuery] = useState(false);
 
-  const parseResult = parseItemInputSpec(inputSpec);
+  const parseResult =
+    commandBarMode === CommandBarMode.ADD
+      ? parseItemInputSpec(inputSpec)
+      : parseQueryInputSpec(inputSpec);
 
   useEffect(() => {
     if (commandBarMode === CommandBarMode.QUERY) {
@@ -40,21 +43,34 @@ export default function CommandBar(props: CommandBarProps) {
     if (commandBarMode === CommandBarMode.ADD) {
       addItem();
     } else {
-      const query = parseInputToQuery(inputSpec);
-      if (query) {
-        props.setQuery(query, inputSpec);
-      }
+      setQuery();
     }
   };
 
   const addItem = () => {
     try {
-      if (parseResult.partial_item && !parseResult.any_error) {
-        let newItem = parseResult.partial_item;
+      if (parseResult.partial_result && !parseResult.any_error) {
+        let newItem = parseResult.partial_result as Partial<Item>;
         newItem.creation_timestamp = Date.now();
         newItem.id = v4();
         newItem.creation_spec = inputSpec.trim();
-        props.addItem(ItemSchema.parse(parseResult.partial_item));
+        props.addItem(ItemSchema.parse(newItem));
+        setInputSpec("");
+      } else if (parseResult.any_error) {
+        // TODO
+        console.log("There was an error: ", parseResult);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const setQuery = () => {
+    try {
+      if (parseResult.partial_result && !parseResult.any_error) {
+        let newQuery = parseResult.partial_result as Partial<Query>;
+        const query = QuerySchema.parse(newQuery);
+        props.setQuery(query, inputSpec);
       } else if (parseResult.any_error) {
         // TODO
         console.log("There was an error: ", parseResult);

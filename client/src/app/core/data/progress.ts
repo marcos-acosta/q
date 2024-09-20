@@ -70,16 +70,8 @@ export const updateItemWithProgress = (
   item: Item,
   progress: Progress
 ): Item => {
-  const newItem: Item = {
+  return {
     ...item,
     progress: [...item.progress, progress],
   };
-  // Archive if not recurring and is completed
-  if (
-    !newItem.time_spec?.recurrence &&
-    getItemCompletionStatus(newItem, new Date()).is_completed
-  ) {
-    newItem.is_archived = true;
-  }
-  return newItem;
 };

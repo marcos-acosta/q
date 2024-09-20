@@ -1,103 +1,120 @@
 import {
+  Field,
+  getFlagRegex,
+  getKeywordRegex,
+  getTagRegex,
+  InterpretedSpecPart,
+  ParseResult,
+  SpecParser,
+  splitInputSpecIntoParts,
+} from "./spec-parsing";
+import {
   BooleanItemField,
-  Query,
-  QuerySchema,
+  BooleanMatcher,
   KeywordMatcher,
-  QuantifierMatcher,
-  QuantifiableItemField,
-  Comparator,
-  QuantifierMatcherSchema,
+  Query,
 } from "@/app/interfaces/query";
-import { regex } from "regex";
-import { parseStringToDate } from "./parsing-util";
 
-const KEYWORD_PATTERN = regex(
-  "g"
-)`(\s|^)(?<neg>!?)(?<keyword>[^\s\#\-]+)(\s|$)`;
-const TAG_PATTERN = regex("g")`(\s|^)(?<neg>!?)\#(?<keyword>\S+)(\s|$)`;
-const DUE_DATE_PATTERN = regex`(\s|^)-d\s(?<body>\S+)(\s|$)`;
-
-const isFlagPresent = (input: string, flag: string) => {
-  const matcher = regex`-${flag}\b`;
-  return Boolean(input.match(matcher));
+const addBooleanMatcherToPartialQuery = (
+  pq: Partial<Query>,
+  booleanMatcher: BooleanMatcher
+) => {
+  pq.boolean_matchers = [...(pq.boolean_matchers || []), booleanMatcher];
+  return pq;
 };
 
-const getKeywords = (input: string, pattern: RegExp) => {
-  const matches = input.matchAll(pattern);
-  let keywords = [] as KeywordMatcher[];
-  for (const match of matches) {
-    if (match.groups && match.groups["keyword"]) {
-      const keyword = match.groups["keyword"];
-      const negative = Boolean(match.groups["neg"].length);
-      keywords.push({ keyword: keyword, negated: negative });
-    }
-  }
-  return keywords;
+const addKeywordMatcherToPartialQuery = (
+  pq: Partial<Query>,
+  keywordMatcher: KeywordMatcher
+) => {
+  pq.keywords = [...(pq.keywords || []), keywordMatcher];
+  return pq;
 };
 
-function getFlagBody<T>(
-  input: string,
-  pattern: RegExp,
-  parser: (s: string) => T | null
-): T | null {
-  const matches = input.match(pattern);
-  if (matches?.groups && matches.groups["body"]) {
-    return parser(matches.groups["body"]);
-  }
-  return null;
-}
-
-const parseDueDate = (dueDateExpression: string): QuantifierMatcher | null => {
-  const quantifierMatcher: Partial<QuantifierMatcher> = {
-    field: QuantifiableItemField.DUE_DATE,
-  };
-  let remainingDueDate = dueDateExpression;
-  if (dueDateExpression.startsWith("<")) {
-    if (dueDateExpression.startsWith("<=")) {
-      quantifierMatcher.comparator = Comparator.LTEQ;
-      remainingDueDate = dueDateExpression.slice(2);
-    } else {
-      quantifierMatcher.comparator = Comparator.LT;
-      remainingDueDate = dueDateExpression.slice(1);
-    }
-  } else if (dueDateExpression.startsWith(">")) {
-    if (dueDateExpression.startsWith(">=")) {
-      quantifierMatcher.comparator = Comparator.GTEQ;
-      remainingDueDate = dueDateExpression.slice(2);
-    } else {
-      quantifierMatcher.comparator = Comparator.GT;
-      remainingDueDate = dueDateExpression.slice(1);
-    }
-  } else {
-    quantifierMatcher.comparator = Comparator.EQ;
-  }
-  try {
-    quantifierMatcher.comparison_value = parseStringToDate(remainingDueDate);
-    return QuantifierMatcherSchema.parse(quantifierMatcher);
-  } catch (e) {
-    return null;
-  }
+const addTagMatcherToPartialQuery = (
+  pq: Partial<Query>,
+  tagMatcher: KeywordMatcher
+) => {
+  pq.tag_matchers = [...(pq.tag_matchers || []), tagMatcher];
+  return pq;
 };
 
-export const parseInputToQuery = (input: string): Query | undefined => {
+const assembleQueryFromParts = (
+  parts: InterpretedSpecPart[]
+): ParseResult<Query> => {
   let partialQuery = {} as Partial<Query>;
-  // Filter out archived by default
-  if (!isFlagPresent(input, "a")) {
-    partialQuery.boolean_matchers = [
-      ...(partialQuery.boolean_matchers || []),
-      { field: BooleanItemField.ARCHIVED, negated: true },
-    ];
+  let allowArchived = false;
+  const interpretedParts = parts.map((part) => {
+    let newPart = part;
+    if (!newPart.error && newPart.result) {
+      const parsedValue = newPart.result.parsed_value;
+      switch (newPart.field) {
+        case Field.QUERY_KEYWORD:
+          addKeywordMatcherToPartialQuery(partialQuery, {
+            keyword: parsedValue,
+            negated: newPart.result.negated,
+          });
+          break;
+        case Field.QUERY_TAGS:
+          addTagMatcherToPartialQuery(partialQuery, {
+            keyword: parsedValue,
+            negated: newPart.result.negated,
+          });
+          break;
+        case Field.QUERY_ARCHIVED:
+          allowArchived = true;
+          break;
+        case Field.QUERY_COMPLETED:
+          addBooleanMatcherToPartialQuery(partialQuery, {
+            negated: newPart.result.negated,
+            field: BooleanItemField.COMPLETED,
+          });
+          break;
+      }
+    }
+    return newPart;
+  });
+  // If -a is not specified, filter out archived tasks by default.
+  if (!allowArchived) {
+    addBooleanMatcherToPartialQuery(partialQuery, {
+      negated: true,
+      field: BooleanItemField.ARCHIVED,
+    });
   }
-  partialQuery.tag_matchers = getKeywords(input, TAG_PATTERN);
-  partialQuery.keywords = getKeywords(input, KEYWORD_PATTERN);
-  partialQuery.quantifier_matchers = [
-    getFlagBody<QuantifierMatcher>(input, DUE_DATE_PATTERN, parseDueDate),
-  ].filter(Boolean) as QuantifierMatcher[];
+  return {
+    partial_result: partialQuery,
+    input_spec_parts: interpretedParts,
+    any_error: interpretedParts.some((part) => part.error),
+  };
+};
 
-  try {
-    return QuerySchema.parse(partialQuery);
-  } catch (e) {
-    console.log(e);
-    return undefined;
-  }
+const QUERY_PARSERS: SpecParser[] = [
+  {
+    field: Field.QUERY_KEYWORD,
+    matcher: getKeywordRegex(true),
+    is_global: true,
+  },
+  {
+    field: Field.QUERY_TAGS,
+    matcher: getTagRegex(true),
+    is_global: true,
+  },
+  {
+    field: Field.QUERY_ARCHIVED,
+    matcher: getFlagRegex("a", true, false),
+  },
+  {
+    field: Field.QUERY_COMPLETED,
+    matcher: getFlagRegex("c", true, true),
+  },
+  {
+    field: Field.QUERY_DUE_DATE,
+    matcher: getFlagRegex("d", false, false),
+    value_parser: (s: string) => s,
+  },
+];
+
+export const parseQueryInputSpec = (inputSpec: string): ParseResult<Query> => {
+  const querySpecParts = splitInputSpecIntoParts(inputSpec, QUERY_PARSERS);
+  return assembleQueryFromParts(querySpecParts);
 };

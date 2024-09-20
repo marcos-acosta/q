@@ -1,7 +1,6 @@
 import { EffortType, Item, PriorityLevel } from "@/app/interfaces/item";
 import { regex } from "regex";
 import {
-  parsePriority,
   parsePriorityFromString,
   parseStringToDate,
   parseTimeDurationToMinutes,
@@ -11,26 +10,26 @@ import {
 import {
   Field,
   getFlagRegex,
+  getTagRegex,
   InterpretedSpecPart,
   ParseResult,
   SpecParser,
   splitInputSpecIntoParts,
 } from "./spec-parsing";
 
-const nameRegex = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
-const tagRegex = regex("dg")`\s?(?<arg>\#(?<value>\S+))\s?`;
+const NAME_REGEX = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
 
 const assembleItemFromParts = (
   parts: InterpretedSpecPart[]
 ): ParseResult<Item> => {
   let partialItem = {} as Partial<Item>;
+  let durationMinutes = undefined as number | undefined;
+  let isHardDeadline = false;
+  let dueDate = undefined as Date | undefined;
   const interpretedParts = parts.map((part) => {
     let newPart = part;
     if (!newPart.error && newPart.result) {
       const parsedValue = newPart.result.parsed_value;
-      let durationMinutes = undefined as number | undefined;
-      let isHardDeadline = false;
-      let dueDate = undefined as Date | undefined;
       switch (newPart.field) {
         case Field.ITEM_NAME:
           partialItem.name = parsedValue as string;
@@ -74,38 +73,38 @@ const assembleItemFromParts = (
           };
           break;
       }
-      if (!partialItem.effort_type) {
-        partialItem.effort_type = EffortType.COMPLETION;
-      }
-      switch (partialItem.effort_type) {
-        case EffortType.COMPLETION:
-          partialItem.time_spec = {
-            ...partialItem.time_spec,
-            estimated_time_effort_minutes: durationMinutes,
-          };
-          break;
-        case EffortType.DURATION:
-          partialItem.time_spec = {
-            ...partialItem.time_spec,
-            required_time_effort_minutes: durationMinutes,
-          };
-          break;
-      }
-      if (dueDate) {
-        partialItem.time_spec = {
-          ...partialItem.time_spec,
-          urgency: {
-            ...partialItem.time_spec?.urgency,
-            expected_completion_date: isHardDeadline ? undefined : dueDate,
-            hard_deadline: isHardDeadline ? dueDate : undefined,
-          },
-        };
-      }
     }
     return newPart;
   });
+  if (!partialItem.effort_type) {
+    partialItem.effort_type = EffortType.COMPLETION;
+  }
+  switch (partialItem.effort_type) {
+    case EffortType.COMPLETION:
+      partialItem.time_spec = {
+        ...partialItem.time_spec,
+        estimated_time_effort_minutes: durationMinutes,
+      };
+      break;
+    case EffortType.DURATION:
+      partialItem.time_spec = {
+        ...partialItem.time_spec,
+        required_time_effort_minutes: durationMinutes,
+      };
+      break;
+  }
+  if (dueDate) {
+    partialItem.time_spec = {
+      ...partialItem.time_spec,
+      urgency: {
+        ...partialItem.time_spec?.urgency,
+        expected_completion_date: isHardDeadline ? undefined : dueDate,
+        hard_deadline: isHardDeadline ? dueDate : undefined,
+      },
+    };
+  }
   return {
-    partial_item: partialItem,
+    partial_result: partialItem,
     input_spec_parts: interpretedParts,
     any_error: interpretedParts.some((part) => part.error),
   };
@@ -114,7 +113,7 @@ const assembleItemFromParts = (
 const ITEM_PARSERS: SpecParser[] = [
   {
     field: Field.ITEM_NAME,
-    matcher: nameRegex,
+    matcher: NAME_REGEX,
   },
   {
     field: Field.ITEM_PRIORITY,
@@ -123,7 +122,7 @@ const ITEM_PARSERS: SpecParser[] = [
   },
   {
     field: Field.ITEM_TAGS,
-    matcher: tagRegex,
+    matcher: getTagRegex(false),
     is_global: true,
   },
   {
