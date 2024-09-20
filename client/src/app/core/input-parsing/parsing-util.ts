@@ -1,5 +1,10 @@
 import { PriorityLevel, TimeUnit } from "@/app/interfaces/item";
 import { regex } from "regex";
+import {
+  addIntervalToDate,
+  getStartOfPreviousPeriod,
+} from "../dates/date-util";
+import { subDays } from "date-fns";
 
 const LETTER_TO_TIME_UNIT: { [key: string]: TimeUnit } = {
   d: TimeUnit.DAY,
@@ -9,6 +14,7 @@ const LETTER_TO_TIME_UNIT: { [key: string]: TimeUnit } = {
 };
 
 const YMD_PATTERN = regex`(?<year>\d{4})-(?<month>\d{2})-(?<date>\d{2})`;
+const MD_PATTERN = regex`(?<month>\d\d?)-(?<date>\d\d?)`;
 
 export interface TimeInterval {
   quantity: number;
@@ -72,8 +78,8 @@ export const parsePriority = (priority: number): PriorityLevel => {
 };
 
 export const parseStringToDate = (timeExpression: string): Date => {
-  // TODO
   const ymdMatch = timeExpression.match(YMD_PATTERN);
+  const mdMatch = timeExpression.match(MD_PATTERN);
   if (ymdMatch && ymdMatch.groups) {
     let newDate = new Date();
     newDate.setHours(0);
@@ -81,7 +87,24 @@ export const parseStringToDate = (timeExpression: string): Date => {
     newDate.setMonth(parseInt(ymdMatch.groups["month"]) - 1);
     newDate.setDate(parseInt(ymdMatch.groups["date"]));
     return newDate;
+  } else if (mdMatch && mdMatch.groups) {
+    let newDate = new Date();
+    newDate.setHours(0);
+    newDate.setMonth(parseInt(mdMatch.groups["month"]) - 1);
+    newDate.setDate(parseInt(mdMatch.groups["date"]));
+    return newDate;
   } else {
-    throw Error("Unimplemented");
+    try {
+      const timeInterval = parseTimeInterval(timeExpression);
+      const startOfPeriod = getStartOfPreviousPeriod(
+        new Date(),
+        timeInterval.unit
+      );
+      return subDays(addIntervalToDate(startOfPeriod, timeInterval), 1);
+    } catch (e) {
+      throw Error(`Could not parse ${timeExpression} as a date.`);
+    }
   }
 };
+
+// export const parseDueDate
