@@ -3,7 +3,7 @@ import { TimeUnit } from "./item";
 
 export enum BooleanItemField {
   RECURRING = "RECURRING",
-  DURATION_BASED = "DURATION_BASED",
+  COMPLETION_BASED = "COMPLETION_BASED",
   ARCHIVED = "ARCHIVED",
   COMPLETED = "COMPLETED",
 }

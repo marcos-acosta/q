@@ -66,6 +66,7 @@ const assembleItemFromParts = (
   let durationMinutes = undefined as number | undefined;
   let isHardDeadline = false;
   let dueDate = undefined as Date | undefined;
+  let forceCompletionBased = false;
   const interpretedParts = parts.map((part) => {
     const newPart = part;
     if (!newPart.error && newPart.result) {
@@ -80,8 +81,8 @@ const assembleItemFromParts = (
         case Field.ITEM_TAGS:
           addTagToPartialItem(partialItem, parsedValue as string);
           break;
-        case Field.ITEM_IS_DURATION_BASED:
-          partialItem.effort_type = EffortType.DURATION;
+        case Field.ITEM_FORCE_COMPLETION_BASED:
+          forceCompletionBased = true;
           break;
         case Field.ITEM_DURATION:
           durationMinutes = parsedValue as number;
@@ -109,7 +110,9 @@ const assembleItemFromParts = (
     }
     return newPart;
   });
-  if (!partialItem.effort_type) {
+  if (durationMinutes && !forceCompletionBased) {
+    partialItem.effort_type = EffortType.DURATION;
+  } else {
     partialItem.effort_type = EffortType.COMPLETION;
   }
   switch (partialItem.effort_type) {
@@ -153,8 +156,8 @@ const ITEM_PARSERS: SpecParser[] = [
     is_global: true,
   },
   {
-    field: Field.ITEM_IS_DURATION_BASED,
-    matcher: getFlagRegex("d", true),
+    field: Field.ITEM_FORCE_COMPLETION_BASED,
+    matcher: getFlagRegex("c", true),
   },
   {
     field: Field.ITEM_DURATION,
@@ -177,7 +180,7 @@ const ITEM_PARSERS: SpecParser[] = [
   },
   {
     field: Field.ITEM_URGENCY,
-    matcher: getFlagRegex("u"),
+    matcher: getFlagRegex("d"),
     value_parser: parseStringToDate,
   },
 ];

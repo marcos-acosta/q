@@ -67,8 +67,8 @@ const doesItemMeetBooleanRequirement = (
     case BooleanItemField.RECURRING:
       meetsRequirement = Boolean(item.time_spec?.recurrence);
       break;
-    case BooleanItemField.DURATION_BASED:
-      meetsRequirement = item.effort_type === EffortType.DURATION;
+    case BooleanItemField.COMPLETION_BASED:
+      meetsRequirement = item.effort_type === EffortType.COMPLETION;
       break;
   }
   return considerNegation(meetsRequirement, booleanMatcher.negated);

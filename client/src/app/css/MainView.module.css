@@ -14,7 +14,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  border-right: 1px solid var(--theme-black);
+  border-right: 2px dashed var(--theme-black);
   width: 20%;
   height: 100vh;
 }

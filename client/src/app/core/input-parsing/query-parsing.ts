@@ -106,10 +106,10 @@ const assembleQueryFromParts = (
             field: BooleanItemField.RECURRING,
           });
           break;
-        case Field.QUERY_DURATION_BASED:
+        case Field.QUERY_COMPLETION_BASED:
           addBooleanMatcherToPartialQuery(partialQuery, {
             negated: newPart.result.negated,
-            field: BooleanItemField.DURATION_BASED,
+            field: BooleanItemField.COMPLETION_BASED,
           });
           break;
         case Field.QUERY_PRIORITY:
@@ -153,7 +153,7 @@ const QUERY_PARSERS: SpecParser[] = [
   },
   {
     field: Field.QUERY_COMPLETED,
-    matcher: getFlagRegex("c", true, true),
+    matcher: getFlagRegex("x", true, true),
   },
   {
     field: Field.QUERY_RECURRING,
@@ -161,12 +161,12 @@ const QUERY_PARSERS: SpecParser[] = [
   },
   {
     field: Field.QUERY_DUE_DATE,
-    matcher: getFlagRegex("u", false, false),
+    matcher: getFlagRegex("d", false, false),
     value_parser: (s: string) => parseDatesToMatchers(s, DateField.DUE_DATE),
   },
   {
-    field: Field.QUERY_DURATION_BASED,
-    matcher: getFlagRegex("d", true, true),
+    field: Field.QUERY_COMPLETION_BASED,
+    matcher: getFlagRegex("c", true, true),
   },
   {
     field: Field.QUERY_PRIORITY,
