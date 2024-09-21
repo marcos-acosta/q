@@ -14,7 +14,7 @@ import {
   subWeeks,
   subYears,
 } from "date-fns";
-import { TimeInterval } from "../input-parsing/parsing-util";
+import { TimeRange } from "@/app/interfaces/query";
 
 const getStartOfToday = (date: Date) => date;
 
@@ -90,20 +90,24 @@ export const findPeriodForDateGivenRecurrence = (
     case TimeUnit.DAY:
       addFn = addDays;
       diffFn = differenceInDays;
+      break;
     case TimeUnit.WEEK:
       addFn = addWeeks;
       diffFn = differenceInWeeks;
+      break;
     case TimeUnit.MONTH:
       addFn = addMonths;
       diffFn = differenceInMonths;
+      break;
     case TimeUnit.YEAR:
       addFn = addYears;
       diffFn = differenceInYears;
+      break;
   }
   return findPeriodForDate(date, recurrence, addFn, diffFn);
 };
 
-export const addIntervalToDate = (date: Date, interval: TimeInterval): Date => {
+export const addIntervalToDate = (date: Date, interval: TimeRange): Date => {
   let addFn: (d: Date, n: number) => Date;
   switch (interval.unit) {
     case TimeUnit.DAY:
@@ -119,13 +123,10 @@ export const addIntervalToDate = (date: Date, interval: TimeInterval): Date => {
       addFn = addYears;
       break;
   }
-  return addFn(date, interval.quantity);
+  return addFn(date, interval.amount);
 };
 
-export const subIntervalFromDate = (
-  date: Date,
-  interval: TimeInterval
-): Date => {
+export const subIntervalFromDate = (date: Date, interval: TimeRange): Date => {
   let subFn: (d: Date, n: number) => Date;
   switch (interval.unit) {
     case TimeUnit.DAY:
@@ -141,7 +142,7 @@ export const subIntervalFromDate = (
       subFn = subYears;
       break;
   }
-  return subFn(date, interval.quantity);
+  return subFn(date, interval.amount);
 };
 
 export const dateRangesEqual = (d1: DateRange, d2: DateRange) =>
@@ -151,7 +152,7 @@ export const dateRangesEqual = (d1: DateRange, d2: DateRange) =>
 export const getNearestDueDateInclusive = (item: Item): Date | null => {
   if (item.time_spec?.recurrence) {
     const relevantPeriod = findPeriodForDateGivenRecurrence(
-      new Date(),
+      item.time_spec.recurrence.start_date,
       item.time_spec.recurrence
     );
     return relevantPeriod
@@ -166,4 +167,13 @@ export const getNearestDueDateInclusive = (item: Item): Date | null => {
       return null;
     }
   }
+};
+
+export const clearTime = (d: Date) => {
+  const date = new Date(d);
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
 };

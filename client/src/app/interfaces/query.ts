@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TimeUnit } from "./item";
 
 export enum BooleanItemField {
   RECURRING = "RECURRING",
@@ -8,9 +9,12 @@ export enum BooleanItemField {
 }
 
 export enum QuantifiableItemField {
+  PRIORITY = "PRIORITY",
+}
+
+export enum DateField {
   DUE_DATE = "DUE_DATE",
   CREATION_DATE = "CREATION_DATE",
-  PRIORITY = "PRIORITY",
 }
 
 export enum Comparator {
@@ -43,11 +47,26 @@ const KeywordMatcherSchema = z.object({
 });
 export type KeywordMatcher = z.infer<typeof KeywordMatcherSchema>;
 
+const TimeRangeSchema = z.object({
+  amount: z.number(),
+  unit: z.nativeEnum(TimeUnit),
+});
+export type TimeRange = z.infer<typeof TimeRangeSchema>;
+
+const DateMatcherSchema = z.object({
+  time_range: z.optional(TimeRangeSchema),
+  date: z.optional(z.coerce.date()),
+  comparator: z.nativeEnum(Comparator),
+  field: z.nativeEnum(DateField),
+});
+export type DateMatcher = z.infer<typeof DateMatcherSchema>;
+
 export const QuerySchema = z.object({
   keywords: z.array(KeywordMatcherSchema).default([]),
   boolean_matchers: z.array(BooleanMatcherSchema).default([]),
   quantifier_matchers: z.array(QuantifierMatcherSchema).default([]),
   tag_matchers: z.array(KeywordMatcherSchema).default([]),
+  date_matchers: z.array(DateMatcherSchema).default([]),
 });
 export type Query = z.infer<typeof QuerySchema>;
 

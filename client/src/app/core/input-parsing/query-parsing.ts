@@ -1,4 +1,4 @@
-import { parseDueDateToDate } from "./parsing-util";
+import { parseDatesToMatchers, parsePriorityToMatcher } from "./parsing-util";
 import {
   Field,
   getFlagRegex,
@@ -12,7 +12,10 @@ import {
 import {
   BooleanItemField,
   BooleanMatcher,
+  DateField,
+  DateMatcher,
   KeywordMatcher,
+  QuantifierMatcher,
   Query,
 } from "@/app/interfaces/query";
 
@@ -40,6 +43,25 @@ const addTagMatcherToPartialQuery = (
   return pq;
 };
 
+const addDateMatchersToPartialQuery = (
+  pq: Partial<Query>,
+  dateMatchers: DateMatcher[]
+) => {
+  pq.date_matchers = [...(pq.date_matchers || []), ...dateMatchers];
+  return pq;
+};
+
+const addQuantifierMatcherToPartialQuery = (
+  pq: Partial<Query>,
+  quantifierMatcher: QuantifierMatcher
+) => {
+  pq.quantifier_matchers = [
+    ...(pq.quantifier_matchers || []),
+    quantifierMatcher,
+  ];
+  return pq;
+};
+
 const assembleQueryFromParts = (
   parts: InterpretedSpecPart[]
 ): ParseResult<Query> => {
@@ -52,13 +74,13 @@ const assembleQueryFromParts = (
       switch (newPart.field) {
         case Field.QUERY_KEYWORD:
           addKeywordMatcherToPartialQuery(partialQuery, {
-            keyword: parsedValue,
+            keyword: parsedValue as string,
             negated: newPart.result.negated,
           });
           break;
         case Field.QUERY_TAGS:
           addTagMatcherToPartialQuery(partialQuery, {
-            keyword: parsedValue,
+            keyword: parsedValue as string,
             negated: newPart.result.negated,
           });
           break;
@@ -70,6 +92,31 @@ const assembleQueryFromParts = (
             negated: newPart.result.negated,
             field: BooleanItemField.COMPLETED,
           });
+          break;
+        case Field.QUERY_DUE_DATE:
+        case Field.QUERY_CREATION_DATE:
+          addDateMatchersToPartialQuery(
+            partialQuery,
+            parsedValue as DateMatcher[]
+          );
+          break;
+        case Field.QUERY_RECURRING:
+          addBooleanMatcherToPartialQuery(partialQuery, {
+            negated: newPart.result.negated,
+            field: BooleanItemField.RECURRING,
+          });
+          break;
+        case Field.QUERY_DURATION_BASED:
+          addBooleanMatcherToPartialQuery(partialQuery, {
+            negated: newPart.result.negated,
+            field: BooleanItemField.DURATION_BASED,
+          });
+          break;
+        case Field.QUERY_PRIORITY:
+          addQuantifierMatcherToPartialQuery(
+            partialQuery,
+            parsedValue as QuantifierMatcher
+          );
           break;
       }
     }
@@ -109,9 +156,28 @@ const QUERY_PARSERS: SpecParser[] = [
     matcher: getFlagRegex("c", true, true),
   },
   {
+    field: Field.QUERY_RECURRING,
+    matcher: getFlagRegex("r", true, true),
+  },
+  {
     field: Field.QUERY_DUE_DATE,
-    matcher: getFlagRegex("d", false, false),
-    value_parser: parseDueDateToDate,
+    matcher: getFlagRegex("u", false, false),
+    value_parser: (s: string) => parseDatesToMatchers(s, DateField.DUE_DATE),
+  },
+  {
+    field: Field.QUERY_DURATION_BASED,
+    matcher: getFlagRegex("d", true, true),
+  },
+  {
+    field: Field.QUERY_PRIORITY,
+    matcher: getFlagRegex("p", false, false),
+    value_parser: parsePriorityToMatcher,
+  },
+  {
+    field: Field.QUERY_CREATION_DATE,
+    matcher: getFlagRegex("o", false, false),
+    value_parser: (s: string) =>
+      parseDatesToMatchers(s, DateField.CREATION_DATE),
   },
 ];
 

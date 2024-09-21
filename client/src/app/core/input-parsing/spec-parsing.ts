@@ -15,6 +15,10 @@ export enum Field {
   QUERY_ARCHIVED,
   QUERY_COMPLETED,
   QUERY_DUE_DATE,
+  QUERY_RECURRING,
+  QUERY_DURATION_BASED,
+  QUERY_PRIORITY,
+  QUERY_CREATION_DATE,
 }
 
 export const REGEX_VALUE_NAME = "value";
@@ -40,8 +44,8 @@ export const getTagRegex = (allowNegation?: boolean) =>
 
 export const getKeywordRegex = (allowNegation?: boolean) =>
   allowNegation
-    ? regex("dg")`(\s|^)(?<arg>(?<neg>!)?(?<value>[^!\-\#\s]+))`
-    : regex("dg")`(\s|^)(?<arg>(?<value>[^!\-\#\s]+))`;
+    ? regex("dg")`(?<!-\w)(\s|^)(?<arg>(?<neg>!)?(?<value>[^!\-\#\s]+))`
+    : regex("dg")`(?<!-\w)(\s|^)(?<arg>(?<value>[^!\-\#\s]+))`;
 
 const DEFAULT_ARG_INDEX = 1;
 

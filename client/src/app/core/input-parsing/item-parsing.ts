@@ -12,7 +12,6 @@ import {
   parseStringToDate,
   parseTimeDurationToMinutes,
   parseTimeInterval,
-  TimeInterval,
 } from "./parsing-util";
 import {
   Field,
@@ -23,6 +22,8 @@ import {
   SpecParser,
   splitInputSpecIntoParts,
 } from "./spec-parsing";
+import { TimeRange } from "@/app/interfaces/query";
+import { getStartOfPreviousPeriod } from "../dates/date-util";
 
 const NAME_REGEX = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
 
@@ -66,7 +67,7 @@ const assembleItemFromParts = (
   let isHardDeadline = false;
   let dueDate = undefined as Date | undefined;
   const interpretedParts = parts.map((part) => {
-    let newPart = part;
+    const newPart = part;
     if (!newPart.error && newPart.result) {
       const parsedValue = newPart.result.parsed_value;
       switch (newPart.field) {
@@ -97,10 +98,11 @@ const assembleItemFromParts = (
           });
           break;
         case Field.ITEM_INVERSE_FREQUENCY:
+          const timeRange = parsedValue as TimeRange;
           addRecurrenceToPartialItem(partialItem, {
-            inverse_frequency: (parsedValue as TimeInterval).quantity,
-            unit: (parsedValue as TimeInterval).unit,
-            start_date: new Date(),
+            inverse_frequency: timeRange.amount,
+            unit: timeRange.unit,
+            start_date: getStartOfPreviousPeriod(new Date(), timeRange.unit),
           });
           break;
       }

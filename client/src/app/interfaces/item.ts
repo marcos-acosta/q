@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export enum PriorityLevel {
-  P0 = "P0",
-  P1 = "P1",
-  P2 = "P2",
-  P3 = "P3",
-  P4 = "P4",
+  P0 = 4,
+  P1 = 3,
+  P2 = 2,
+  P3 = 1,
+  P4 = 0,
 }
 
 export enum TimeUnit {

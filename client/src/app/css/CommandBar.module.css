@@ -13,7 +13,7 @@
   flex-direction: row;
   align-items: center;
   padding-top: 30px;
-  padding-left: calc(20% - 74px);
+  padding-left: calc(30% - 74px);
 }
 
 .addItemButton {

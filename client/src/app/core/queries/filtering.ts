@@ -1,16 +1,25 @@
-import { Item } from "@/app/interfaces/item";
+import { EffortType, Item, TimeUnit } from "@/app/interfaces/item";
 import {
   BooleanItemField,
   BooleanMatcher,
   Comparator,
+  DateField,
+  DateMatcher,
   KeywordMatcher,
   QuantifiableItemField,
   QuantifierMatcher,
   Query,
   QueryComparableType,
+  TimeRange,
 } from "@/app/interfaces/query";
-import { getNearestDueDateInclusive } from "../dates/date-util";
+import {
+  addIntervalToDate,
+  clearTime,
+  getNearestDueDateInclusive,
+  getStartOfPreviousPeriod,
+} from "../dates/date-util";
 import { getItemCompletionStatus } from "../data/progress";
+import { subMilliseconds } from "date-fns";
 
 export const DEFAULT_QUERY: Query = {
   keywords: [],
@@ -22,6 +31,7 @@ export const DEFAULT_QUERY: Query = {
   ],
   quantifier_matchers: [],
   tag_matchers: [],
+  date_matchers: [],
 };
 
 const considerNegation = (meetsRequirement: boolean, negated: boolean) =>
@@ -54,8 +64,12 @@ const doesItemMeetBooleanRequirement = (
     case BooleanItemField.COMPLETED:
       meetsRequirement = getItemCompletionStatus(item, new Date()).is_completed;
       break;
-    default:
-      meetsRequirement = false;
+    case BooleanItemField.RECURRING:
+      meetsRequirement = Boolean(item.time_spec?.recurrence);
+      break;
+    case BooleanItemField.DURATION_BASED:
+      meetsRequirement = item.effort_type === EffortType.DURATION;
+      break;
   }
   return considerNegation(meetsRequirement, booleanMatcher.negated);
 };
@@ -82,23 +96,38 @@ const compareValues = (
   }
 };
 
+const compareDateToTimeRange = (
+  d: Date,
+  timeRange: TimeRange,
+  comparator: Comparator
+) => {
+  const startOfPeriod = clearTime(
+    getStartOfPreviousPeriod(new Date(), timeRange.unit)
+  );
+  const endOfPeriodExclusive = clearTime(
+    addIntervalToDate(startOfPeriod, timeRange)
+  );
+  const endOfPeriodInclusive = subMilliseconds(endOfPeriodExclusive, 1);
+  switch (comparator) {
+    case Comparator.EQ:
+      return d >= startOfPeriod && d <= endOfPeriodInclusive;
+    case Comparator.LTEQ:
+      return d <= endOfPeriodInclusive;
+    case Comparator.GTEQ:
+      return d >= startOfPeriod;
+    case Comparator.LT:
+      return d < startOfPeriod;
+    case Comparator.GT:
+      return d > endOfPeriodInclusive;
+  }
+};
+
 const doesItemMeetQuantifierMatcher = (
   item: Item,
   quantifierMatcher: QuantifierMatcher
 ) => {
   let comparisonLeftHand;
   switch (quantifierMatcher.field) {
-    case QuantifiableItemField.CREATION_DATE:
-      comparisonLeftHand = new Date(item.creation_timestamp);
-      break;
-    case QuantifiableItemField.DUE_DATE:
-      const nearestDueDate = getNearestDueDateInclusive(item);
-      if (!nearestDueDate) {
-        return false;
-      } else {
-        comparisonLeftHand = nearestDueDate;
-      }
-      break;
     case QuantifiableItemField.PRIORITY:
       comparisonLeftHand = item.priority;
       break;
@@ -108,6 +137,37 @@ const doesItemMeetQuantifierMatcher = (
     quantifierMatcher.comparison_value,
     quantifierMatcher.comparator
   );
+};
+
+const doesDateMeetDateMatcher = (date: Date, dueDateMatcher: DateMatcher) => {
+  let timeRange;
+  if (dueDateMatcher.date) {
+    timeRange = {
+      amount: 1,
+      unit: TimeUnit.DAY,
+    } as TimeRange;
+  } else if (dueDateMatcher.time_range) {
+    timeRange = dueDateMatcher.time_range;
+  } else {
+    return false;
+  }
+  return compareDateToTimeRange(date, timeRange, dueDateMatcher.comparator);
+};
+
+const doesItemMeetDateMatcher = (item: Item, dateMatcher: DateMatcher) => {
+  let leftHandDate;
+  switch (dateMatcher.field) {
+    case DateField.DUE_DATE:
+      leftHandDate = getNearestDueDateInclusive(item);
+      break;
+    case DateField.CREATION_DATE:
+      leftHandDate = new Date(item.creation_timestamp);
+      break;
+  }
+  if (!leftHandDate) {
+    return false;
+  }
+  return doesDateMeetDateMatcher(leftHandDate, dateMatcher);
 };
 
 export const itemMeetsQuery = (item: Item, query: Query) => {
@@ -126,8 +186,13 @@ export const itemMeetsQuery = (item: Item, query: Query) => {
       return false;
     }
   }
-  for (const quantifier_matcher of query.quantifier_matchers) {
-    if (!doesItemMeetQuantifierMatcher(item, quantifier_matcher)) {
+  for (const quantifierMatcher of query.quantifier_matchers) {
+    if (!doesItemMeetQuantifierMatcher(item, quantifierMatcher)) {
+      return false;
+    }
+  }
+  for (const dueDateMatcher of query.date_matchers) {
+    if (!doesItemMeetDateMatcher(item, dueDateMatcher)) {
       return false;
     }
   }
