@@ -15,9 +15,10 @@ import { summarizeTaskTimeSpec } from "@/app/core/data-rendering/time-spec";
 
 interface ItemCardProps {
   item: Item;
-  addProgress: (p: Progress, i: Item) => void;
-  archive: () => void;
-  delete: () => void;
+  addProgress?: (p: Progress, i: Item) => void;
+  archive?: () => void;
+  delete?: () => void;
+  demo?: boolean;
 }
 
 export default function ItemCard(props: ItemCardProps) {
@@ -25,7 +26,10 @@ export default function ItemCard(props: ItemCardProps) {
 
   const item = props.item;
 
-  const addOneTimeProgress = () =>
+  const addOneTimeProgress = () => {
+    if (props.demo || !props.addProgress) {
+      return;
+    }
     props.addProgress(
       {
         timestamp: Date.now(),
@@ -33,8 +37,12 @@ export default function ItemCard(props: ItemCardProps) {
       },
       item
     );
+  };
 
   const addDurationProgress = (duration_minutes: number) => {
+    if (props.demo || !props.addProgress) {
+      return;
+    }
     props.addProgress(
       {
         timestamp: Date.now(),
@@ -84,18 +92,20 @@ export default function ItemCard(props: ItemCardProps) {
       onMouseLeave={() => setIsHovering(false)}
     >
       <div className={styles.itemCardContainer}>
-        <div className={styles.completeBox}>
-          <CompletionButton
-            isInputType={item.effort_type === EffortType.DURATION}
-            clickCallback={addOneTimeProgress}
-            inputCallback={addDurationProgress}
-          >
-            <ProgressCircle
-              completed={completionStatus.progress}
-              total={completionStatus.quota || 1}
-            />
-          </CompletionButton>
-        </div>
+        {!props.demo && (
+          <div className={styles.completeBox}>
+            <CompletionButton
+              isInputType={item.effort_type === EffortType.DURATION}
+              clickCallback={addOneTimeProgress}
+              inputCallback={addDurationProgress}
+            >
+              <ProgressCircle
+                completed={completionStatus.progress}
+                total={completionStatus.quota || 1}
+              />
+            </CompletionButton>
+          </div>
+        )}
         <div className={styles.itemNameAndActionsContainer}>
           <div
             className={combineClasses(
@@ -105,7 +115,7 @@ export default function ItemCard(props: ItemCardProps) {
           >
             {capitalize(item.name)}
           </div>
-          {isHovering && (
+          {isHovering && !props.demo && (
             <div className={styles.actions}>
               {joinNodes(actionButtons, " ")}
             </div>

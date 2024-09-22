@@ -18,3 +18,8 @@
   width: 20%;
   height: 100vh;
 }
+
+.preventScrolling {
+  overflow: hidden;
+  height: 100vh;
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import CommandBar from "./CommandBar";
+import useKeyboardControl from "react-keyboard-control";
+import { KeyboardHook } from "react-keyboard-control";
 import ItemList from "./ItemList";
 import { Item, Progress } from "@/app/interfaces/item";
 import {
@@ -17,9 +18,12 @@ import {
 import { basicSortItems } from "@/app/core/sorting/sorting";
 import { addNamedQueryToDb, deleteQueryInDb } from "@/app/server/queries";
 import { v4 as uuid_v4 } from "uuid";
-import style from "@/app/css/MainView.module.css";
+import styles from "@/app/css/MainView.module.css";
 import QueryList from "./QueryList";
 import { NamedQuery, Query } from "../interfaces/query";
+import { addListener } from "process";
+import ItemInput from "./ItemInput";
+import { combineClasses } from "../core/styling/css";
 
 export interface MainViewProps {
   items: Item[];
@@ -35,12 +39,14 @@ export default function MainView(props: MainViewProps) {
   const [querySpecInEffect, setQuerySpecInEffect] = useState("");
   const [queryInEffect, setQueryInEffect] = useState(null as Query | null);
   const [selectedQueryId, setSelectedQueryId] = useState(null as string | null);
+  const [isShowingItemInput, setIsShowingItemInput] = useState(false);
   const setNow = useState(Date.now())[1];
 
   useEffect(() => {
     const updateNow = () => setNow(Date.now());
     // Update every 5 minutes
     const intervalId = setInterval(updateNow, 1000 * 60 * 5);
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -133,11 +139,39 @@ export default function MainView(props: MainViewProps) {
     }
   };
 
+  const cancelAll = () => {
+    setIsShowingItemInput(false);
+  };
+
+  const keyboardHooks: KeyboardHook[] = [
+    {
+      keyboardEvent: { key: "a" },
+      callback: () => setIsShowingItemInput(true),
+      allowWhen: !isShowingItemInput,
+      preventDefault: true,
+    },
+    {
+      keyboardEvent: { key: "Escape" },
+      callback: cancelAll,
+      allowWhen: isShowingItemInput,
+      allowOnTextInput: true,
+    },
+  ];
+  useKeyboardControl(keyboardHooks);
+
   return props.isOffline ? (
     <div>you're offline</div>
   ) : (
-    <div>
-      <div className={style.queryBar}>
+    <div
+      className={combineClasses(isShowingItemInput && styles.preventScrolling)}
+    >
+      {isShowingItemInput && (
+        <ItemInput
+          callback={addItem}
+          cancel={() => setIsShowingItemInput(false)}
+        />
+      )}
+      <div className={styles.queryBar}>
         <QueryList
           namedQueries={props.queries}
           selectedQueryId={selectedQueryId}
@@ -146,12 +180,6 @@ export default function MainView(props: MainViewProps) {
         />
       </div>
       <div>
-        <CommandBar
-          addItem={addItem}
-          setQuery={setQueryAndSpec}
-          querySpecInEffect={querySpecInEffect}
-          addNamedQuery={addNamedQuery}
-        />
         <ItemList
           items={filteredItems}
           isLoading={props.isItemsLoading}

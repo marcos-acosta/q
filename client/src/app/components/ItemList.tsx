@@ -19,16 +19,18 @@ export default function ItemList(props: ItemListProps) {
         "loading..."
       ) : (
         <div className={styles.itemListContainer}>
-          {props.items.map((item: Item) => (
-            <div key={item.id}>
-              <ItemCard
-                item={item}
-                addProgress={props.addProgress}
-                archive={() => props.archive(item)}
-                delete={() => props.delete(item)}
-              />
-            </div>
-          ))}
+          <div className={styles.itemListGrid}>
+            {props.items.map((item: Item) => (
+              <div key={item.id}>
+                <ItemCard
+                  item={item}
+                  addProgress={props.addProgress}
+                  archive={() => props.archive(item)}
+                  delete={() => props.delete(item)}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

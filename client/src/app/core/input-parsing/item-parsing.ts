@@ -23,7 +23,7 @@ import {
   splitInputSpecIntoParts,
 } from "./spec-parsing";
 import { TimeRange } from "@/app/interfaces/query";
-import { getStartOfPreviousPeriod } from "../dates/date-util";
+import { clearTime, getStartOfPreviousPeriod } from "../dates/date-util";
 
 const NAME_REGEX = regex("d")`^(?<arg>(?<value>[^\-\#]+))(\s|$)`;
 
@@ -103,7 +103,9 @@ const assembleItemFromParts = (
           addRecurrenceToPartialItem(partialItem, {
             inverse_frequency: timeRange.amount,
             unit: timeRange.unit,
-            start_date: getStartOfPreviousPeriod(new Date(), timeRange.unit),
+            start_date: clearTime(
+              getStartOfPreviousPeriod(new Date(), timeRange.unit)
+            ),
           });
           break;
       }

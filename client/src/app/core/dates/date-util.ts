@@ -62,21 +62,21 @@ const findPeriodForDate = (
   diffFn: (d1: Date, d2: Date) => number
 ): null | DateRange => {
   const startDate = recurrence.start_date;
-  const daysBetween = diffFn(date, startDate);
-  if (daysBetween < 0) {
+  const unitsBetween = diffFn(date, startDate);
+  if (unitsBetween < 0) {
     return null;
   }
   const numberOfPeriodsBetweenDates = Math.floor(
-    daysBetween / recurrence.inverse_frequency
+    unitsBetween / recurrence.inverse_frequency
   );
   const periodStart = addFn(
-    date,
+    startDate,
     numberOfPeriodsBetweenDates * recurrence.inverse_frequency
   );
   const periodEnd = addFn(periodStart, recurrence.inverse_frequency);
   return {
-    start_date_inclusive: periodStart,
-    end_date_exclusive: periodEnd,
+    start_date_inclusive: clearTime(periodStart),
+    end_date_exclusive: clearTime(periodEnd),
   };
 };
 

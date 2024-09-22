@@ -1,4 +1,29 @@
 .itemListContainer {
-  margin-top: 50px;
+  margin-top: 5vh;
   padding-left: 30%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100vw;
+  max-width: 100%;
+}
+
+@media (width >= 2200px) {
+  .itemListGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (1600px <= width < 2200px) {
+  .itemListGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (width < 1600px) {
+  .itemListGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 }

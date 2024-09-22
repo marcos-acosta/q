@@ -3,6 +3,7 @@ body {
   --theme-black: #2e2e2e;
   --theme-gray: rgb(110, 111, 119);
   margin: 0;
+  color: var(--theme-black);
 }
 
 button {
