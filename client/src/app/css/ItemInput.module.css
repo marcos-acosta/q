@@ -21,7 +21,10 @@
   margin-bottom: 3vh;
 }
 
-span.addSymbol {
-  font-size: 30px;
-  color: white;
+.inputBox.inputError {
+  border-bottom: 2px solid var(--theme-red);
+}
+
+.errorMessage {
+  color: var(--theme-red);
 }

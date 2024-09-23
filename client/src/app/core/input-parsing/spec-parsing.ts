@@ -102,7 +102,7 @@ const applyParserToSpec = (
           ),
         };
       } catch (e) {
-        interpretedPart.error = `Could not parse "${matchResult.groups[REGEX_ARG_NAME]}"`;
+        interpretedPart.error = `Could not parse "${matchResult.groups[REGEX_ARG_NAME]}".`;
       }
       results.push(interpretedPart as InterpretedSpecPart);
     }

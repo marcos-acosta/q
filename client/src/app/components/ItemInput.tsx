@@ -54,7 +54,11 @@ export default function ItemInput(props: ItemInputProps) {
   return (
     <div className={styles.fullScreenInputContainer} onClick={props.cancel}>
       <input
-        className={combineClasses(styles.inputBox, SOURCE_CODE_PRO.className)}
+        className={combineClasses(
+          styles.inputBox,
+          SOURCE_CODE_PRO.className,
+          errorMessage && inputSpec.length > 0 && styles.inputError
+        )}
         placeholder={placeholderText}
         value={inputSpec}
         onChange={(e) => setInputSpec(e.target.value)}
@@ -66,7 +70,14 @@ export default function ItemInput(props: ItemInputProps) {
         (item ? (
           <ItemCard item={item} demo={true} />
         ) : (
-          <div>{errorMessage}</div>
+          <div
+            className={combineClasses(
+              styles.errorMessage,
+              SOURCE_CODE_PRO.className
+            )}
+          >
+            {errorMessage}
+          </div>
         ))}
     </div>
   );

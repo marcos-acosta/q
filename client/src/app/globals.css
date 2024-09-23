@@ -2,6 +2,7 @@ body {
   font-size: 18pt;
   --theme-black: #2e2e2e;
   --theme-gray: rgb(110, 111, 119);
+  --theme-red: #f8333c;
   margin: 0;
   color: var(--theme-black);
 }
