@@ -23,6 +23,7 @@
 
 .inputBox.inputError {
   border-bottom: 2px solid var(--theme-red);
+  color: var(--theme-red);
 }
 
 .errorMessage {

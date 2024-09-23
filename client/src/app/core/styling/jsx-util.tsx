@@ -15,9 +15,10 @@ export const joinNodes = (sections: ReactNode[], delimiter: ReactNode) => {
 
 export const callbackOnEnter = (
   event: React.KeyboardEvent,
-  callbackFn: () => void
+  callbackFn: () => void,
+  requireMeta?: boolean
 ) => {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" && (!requireMeta || event.metaKey)) {
     callbackFn();
   }
 };

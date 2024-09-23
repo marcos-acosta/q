@@ -21,9 +21,9 @@ import { v4 as uuid_v4 } from "uuid";
 import styles from "@/app/css/MainView.module.css";
 import QueryList from "./QueryList";
 import { NamedQuery, Query } from "../interfaces/query";
-import { addListener } from "process";
 import ItemInput from "./ItemInput";
 import { combineClasses } from "../core/styling/css";
+import QueryInput from "./QueryInput";
 
 export interface MainViewProps {
   items: Item[];
@@ -36,10 +36,10 @@ export interface MainViewProps {
 }
 
 export default function MainView(props: MainViewProps) {
-  const [querySpecInEffect, setQuerySpecInEffect] = useState("");
   const [queryInEffect, setQueryInEffect] = useState(null as Query | null);
   const [selectedQueryId, setSelectedQueryId] = useState(null as string | null);
   const [isShowingItemInput, setIsShowingItemInput] = useState(false);
+  const [isShowingQueryInput, setIsShowingQueryInput] = useState(false);
   const setNow = useState(Date.now())[1];
 
   useEffect(() => {
@@ -65,7 +65,6 @@ export default function MainView(props: MainViewProps) {
     }
     const namedQuery: NamedQuery = {
       query: queryInEffect,
-      creation_spec: querySpecInEffect,
       query_name: queryName,
       id: uuid_v4(),
       creation_timestamp: Date.now(),
@@ -77,11 +76,6 @@ export default function MainView(props: MainViewProps) {
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const setQueryAndSpec = (q: Query, querySpec: string) => {
-    setQueryInEffect(q);
-    setQuerySpecInEffect(querySpec);
   };
 
   const addProgress = (progress: Progress, item: Item) => {
@@ -117,16 +111,8 @@ export default function MainView(props: MainViewProps) {
     }
   };
 
-  const filteredItems = basicSortItems(
-    filterItemsByQuery(
-      props.items,
-      queryInEffect ? queryInEffect : DEFAULT_QUERY
-    )
-  );
-
   const selectQuery = (namedQuery: NamedQuery | null) => {
     setQueryInEffect(namedQuery ? namedQuery.query : null);
-    setQuerySpecInEffect(namedQuery ? namedQuery.creation_spec : "");
     setSelectedQueryId(namedQuery ? namedQuery.id : null);
   };
 
@@ -139,8 +125,21 @@ export default function MainView(props: MainViewProps) {
     }
   };
 
+  const cancelQuery = () => {
+    setIsShowingQueryInput(false);
+    setQueryInEffect(null);
+    setSelectedQueryId(null);
+  };
+
   const cancelAll = () => {
     setIsShowingItemInput(false);
+    cancelQuery();
+  };
+
+  const showQueryInput = () => {
+    setIsShowingQueryInput(true);
+    setQueryInEffect(null);
+    setSelectedQueryId(null);
   };
 
   const keyboardHooks: KeyboardHook[] = [
@@ -151,19 +150,35 @@ export default function MainView(props: MainViewProps) {
       preventDefault: true,
     },
     {
+      keyboardEvent: { key: "q" },
+      callback: showQueryInput,
+      allowWhen: !isShowingItemInput,
+      preventDefault: true,
+    },
+    {
       keyboardEvent: { key: "Escape" },
       callback: cancelAll,
-      allowWhen: isShowingItemInput,
+      allowWhen: isShowingItemInput || isShowingQueryInput,
       allowOnTextInput: true,
     },
   ];
   useKeyboardControl(keyboardHooks);
 
+  const filteredItems = basicSortItems(
+    filterItemsByQuery(
+      props.items,
+      queryInEffect ? queryInEffect : DEFAULT_QUERY
+    )
+  );
+
   return props.isOffline ? (
     <div>you're offline</div>
   ) : (
     <div
-      className={combineClasses(isShowingItemInput && styles.preventScrolling)}
+      className={combineClasses(
+        styles.mainViewContainer,
+        isShowingItemInput && styles.preventScrolling
+      )}
     >
       {isShowingItemInput && (
         <ItemInput
@@ -171,21 +186,40 @@ export default function MainView(props: MainViewProps) {
           cancel={() => setIsShowingItemInput(false)}
         />
       )}
+      <div className={styles.twoPanelLayout}>
+        <div
+          className={combineClasses(
+            styles.queryBar,
+            styles.queryBarPlaceholder
+          )}
+        />
+        <div className={styles.itemListAndQueryContainer}>
+          {isShowingQueryInput && (
+            <div className={styles.queryInputContainer}>
+              <QueryInput
+                callback={setQueryInEffect}
+                cancel={cancelQuery}
+                saveQuery={addNamedQuery}
+              />
+            </div>
+          )}
+          <div className={styles.itemListContainer}>
+            <ItemList
+              items={filteredItems}
+              isLoading={props.isItemsLoading}
+              addProgress={addProgress}
+              archive={archive}
+              delete={deleteItem}
+            />
+          </div>
+        </div>
+      </div>
       <div className={styles.queryBar}>
         <QueryList
           namedQueries={props.queries}
           selectedQueryId={selectedQueryId}
           selectQuery={selectQuery}
           deleteQuery={deleteQuery}
-        />
-      </div>
-      <div>
-        <ItemList
-          items={filteredItems}
-          isLoading={props.isItemsLoading}
-          addProgress={addProgress}
-          archive={archive}
-          delete={deleteItem}
         />
       </div>
     </div>

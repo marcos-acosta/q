@@ -67,13 +67,13 @@ export const QuerySchema = z.object({
   quantifier_matchers: z.array(QuantifierMatcherSchema).default([]),
   tag_matchers: z.array(KeywordMatcherSchema).default([]),
   date_matchers: z.array(DateMatcherSchema).default([]),
+  creation_spec: z.string(),
 });
 export type Query = z.infer<typeof QuerySchema>;
 
 export const NamedQuerySchema = z.object({
   query: QuerySchema,
   query_name: z.string(),
-  creation_spec: z.string(),
   id: z.string(),
   creation_timestamp: z.number(),
 });

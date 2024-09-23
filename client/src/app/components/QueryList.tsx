@@ -25,7 +25,7 @@ export default function QueryList(props: QueryListProps) {
     ...props.namedQueries.map((namedQuery) => (
       <QueryCard
         queryName={namedQuery.query_name}
-        querySpec={namedQuery.creation_spec}
+        querySpec={namedQuery.query.creation_spec}
         isSelected={namedQuery.id === props.selectedQueryId}
         selectCallback={() => props.selectQuery(namedQuery)}
         delete={() => props.deleteQuery(namedQuery)}

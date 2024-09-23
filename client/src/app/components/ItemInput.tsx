@@ -49,7 +49,7 @@ export default function ItemInput(props: ItemInputProps) {
     }
   };
 
-  const placeholderText = "add a new item";
+  const PLACEHOLDER_TEXT = "add a new item";
 
   return (
     <div className={styles.fullScreenInputContainer} onClick={props.cancel}>
@@ -59,11 +59,11 @@ export default function ItemInput(props: ItemInputProps) {
           SOURCE_CODE_PRO.className,
           errorMessage && inputSpec.length > 0 && styles.inputError
         )}
-        placeholder={placeholderText}
+        placeholder={PLACEHOLDER_TEXT}
         value={inputSpec}
         onChange={(e) => setInputSpec(e.target.value)}
         onKeyDown={(e) => callbackOnEnter(e, handleEnter)}
-        size={Math.max(inputSpec.length, placeholderText.length)}
+        size={Math.max(inputSpec.length, PLACEHOLDER_TEXT.length)}
         autoFocus
       />
       {inputSpec.length > 0 &&
