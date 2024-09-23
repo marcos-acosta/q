@@ -24,6 +24,7 @@ import { NamedQuery, Query } from "../interfaces/query";
 import ItemInput from "./ItemInput";
 import { combineClasses } from "../core/styling/css";
 import QueryInput from "./QueryInput";
+import OfflineScreen from "./OfflineScreen";
 
 export interface MainViewProps {
   items: Item[];
@@ -173,7 +174,7 @@ export default function MainView(props: MainViewProps) {
   );
 
   return props.isOffline ? (
-    <div>you're offline</div>
+    <OfflineScreen />
   ) : (
     <div
       className={combineClasses(
