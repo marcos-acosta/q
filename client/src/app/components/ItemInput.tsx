@@ -62,7 +62,7 @@ export default function ItemInput(props: ItemInputProps) {
         placeholder={PLACEHOLDER_TEXT}
         value={inputSpec}
         onChange={(e) => setInputSpec(e.target.value)}
-        onKeyDown={(e) => callbackOnEnter(e, handleEnter)}
+        onKeyDown={(e) => callbackOnEnter(e, handleEnter, true)}
         size={Math.max(inputSpec.length, PLACEHOLDER_TEXT.length)}
         autoFocus
       />

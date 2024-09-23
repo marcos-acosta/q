@@ -73,6 +73,7 @@ export default function MainView(props: MainViewProps) {
       addNamedQueryToDb(namedQuery).then((response) => console.log(response));
       props.setQueries([...props.queries, namedQuery]);
       selectQuery(namedQuery);
+      setIsShowingQueryInput(false);
     } catch (e) {
       console.log(e);
     }

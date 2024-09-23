@@ -11,3 +11,18 @@
   border-bottom: 2px solid var(--theme-red);
   color: var(--theme-red);
 }
+
+.inputBox.hideUnderline {
+  border-bottom: none;
+}
+
+.queryInputAndNamingContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.bulletPoint {
+  margin-left: 0.75em;
+  margin-right: 0.75em;
+}

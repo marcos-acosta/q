@@ -36,11 +36,21 @@ const convertInputSpecToQueryOrError = (
 
 export default function QueryInput(props: QueryInputProps) {
   const [inputSpec, setInputSpec] = useState("");
+  const [queryName, setQueryName] = useState("");
+  const [isShowingQueryName, setIsShowingQueryName] = useState(false);
 
   const [query, errorMessage] = convertInputSpecToQueryOrError(inputSpec);
 
-  const handleEnter = () => {
-    console.log("cmd-enter");
+  const handleQuerySpecEnter = () => {
+    if (query) {
+      setIsShowingQueryName(true);
+    }
+  };
+
+  const handleQueryNameEnter = () => {
+    if (query && queryName) {
+      props.saveQuery(queryName);
+    }
   };
 
   useEffect(() => {
@@ -49,23 +59,45 @@ export default function QueryInput(props: QueryInputProps) {
     }
   }, [inputSpec]);
 
-  const PLACEHOLDER_TEXT = "query";
+  const SPEC_PLACEHOLDER_TEXT = "query";
+  const NAME_PLACEHOLDER_TEXT = "name";
 
   return (
-    <div>
+    <div className={styles.queryInputAndNamingContainer}>
       <input
         className={combineClasses(
           styles.inputBox,
           SOURCE_CODE_PRO.className,
-          errorMessage && inputSpec.length > 0 && styles.inputError
+          errorMessage && inputSpec.length > 0 && styles.inputError,
+          isShowingQueryName && styles.hideUnderline
         )}
-        placeholder={PLACEHOLDER_TEXT}
+        placeholder={SPEC_PLACEHOLDER_TEXT}
         value={inputSpec}
         onChange={(e) => setInputSpec(e.target.value)}
-        onKeyDown={(e) => callbackOnEnter(e, handleEnter, true)}
-        size={Math.max(inputSpec.length, PLACEHOLDER_TEXT.length)}
+        onKeyDown={(e) => callbackOnEnter(e, handleQuerySpecEnter, true)}
+        size={Math.max(
+          inputSpec.length,
+          isShowingQueryName ? 0 : SPEC_PLACEHOLDER_TEXT.length
+        )}
         autoFocus
       />
+      {isShowingQueryName && (
+        <>
+          <span className={styles.bulletPoint}>•</span>
+          <input
+            className={combineClasses(
+              styles.inputBox,
+              SOURCE_CODE_PRO.className
+            )}
+            placeholder={NAME_PLACEHOLDER_TEXT}
+            value={queryName}
+            onChange={(e) => setQueryName(e.target.value)}
+            onKeyDown={(e) => callbackOnEnter(e, handleQueryNameEnter, true)}
+            size={Math.max(queryName.length, NAME_PLACEHOLDER_TEXT.length)}
+            autoFocus
+          />
+        </>
+      )}
     </div>
   );
 }
