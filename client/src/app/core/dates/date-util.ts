@@ -152,7 +152,7 @@ export const dateRangesEqual = (d1: DateRange, d2: DateRange) =>
 export const getNearestDueDateInclusive = (item: Item): Date | null => {
   if (item.time_spec?.recurrence) {
     const relevantPeriod = findPeriodForDateGivenRecurrence(
-      item.time_spec.recurrence.start_date,
+      new Date(),
       item.time_spec.recurrence
     );
     return relevantPeriod

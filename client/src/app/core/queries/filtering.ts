@@ -32,6 +32,7 @@ export const DEFAULT_QUERY: Query = {
   quantifier_matchers: [],
   tag_matchers: [],
   date_matchers: [],
+  creation_spec: "",
 };
 
 const considerNegation = (meetsRequirement: boolean, negated: boolean) =>
